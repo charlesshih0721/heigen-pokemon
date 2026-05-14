@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>海根寶可夢伺服器</title>
+  
+  <!-- 載入 Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- 載入 React -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  
+  <!-- 載入 Babel 讓瀏覽器看得懂 JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <!-- 載入 Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateY(20px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .animate-fadeIn {
+      animation: fadeIn 0.3s ease-out forwards;
+    }
+    .animate-slideInRight {
+      animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+  
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // 自訂的 Icon 元件，用於載入 Lucide Icons
+    const Icon = ({ name, size = 24, className = "" }) => {
+      return (
+        <span
+          className={`inline-flex items-center justify-center ${className}`}
+          dangerouslySetInnerHTML={{
+            __html: `<i data-lucide="${name}" width="${size}" height="${size}" stroke-width="2" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></i>`
+          }}
+        />
+      );
+    };
+
+    function App() {
+      const [activeTab, setActiveTab] = useState('info'); 
+      const [copied, setCopied] = useState(false);
+      const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+      
+      const [selectedLocation, setSelectedLocation] = useState(null);
+      const [activeSubTab, setActiveSubTab] = useState('npc');
+      
+      const [isPokeballModalOpen, setIsPokeballModalOpen] = useState(false);
+      const [isPokedexModalOpen, setIsPokedexModalOpen] = useState(false);
+      const [pokedexSearchTerm, setPokedexSearchTerm] = useState("");
+      const [activeGen, setActiveGen] = useState(1);
+
+      const serverIP = "7da83f03.tw.vproxy.cloud:20506";
+
+      // 每次畫面更新時，重新渲染 Icons
+      useEffect(() => {
+        lucide.createIcons();
+      });
+
+      const copyToClipboard = () => {
+        const textArea = document.createElement("textarea");
+        textArea.value = serverIP;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+          console.error('複製失敗', err);
+        }
+        document.body.removeChild(textArea);
+      };
+
+      const navItems = [
+        { id: 'info', label: '伺服器資訊', iconName: 'info' },
+        { id: 'map', label: '伺服器地圖', iconName: 'map' },
+        { id: 'pokemon', label: '寶可夢資訊', iconName: 'cat' },
+        { id: 'region', label: '地區資訊', iconName: 'globe' },
+      ];
+
+      const externalLinks = [
+        { 
+          label: '模組包下載', 
+          url: 'https://drive.google.com/drive/folders/17z3vXYSea4DSzu17c1XNQsp87aUfFwt_?usp=sharing', 
+          iconName: 'download',
+          color: 'bg-emerald-600/90 hover:bg-emerald-500'
+        },
+        { 
+          label: 'Discord', 
+          url: 'https://discord.com/invite/yYRvGPs', 
+          iconName: 'message-square',
+          color: 'bg-indigo-600/90 hover:bg-indigo-500'
+        },
+        { 
+          label: '贊助我們', 
+          url: 'https://heinekencobblemonworld.cashier.ecpay.com.tw', 
+          iconName: 'heart',
+          color: 'bg-rose-500/90 hover:bg-rose-400'
+        },
+      ];
+
+      const generations = [
+        { id: 1, name: "第一世代", region: "關都" },
+        { id: 2, name: "第二世代", region: "城都" },
+        { id: 3, name: "第三世代", region: "豐緣" },
+        { id: 4, name: "第四世代", region: "神奧" },
+        { id: 5, name: "第五世代", region: "合眾" },
+        { id: 6, name: "第六世代", region: "卡洛斯" },
+        { id: 7, name: "第七世代", region: "阿羅拉" },
+        { id: 8, name: "第八世代", region: "伽勒爾" },
+        { id: 9, name: "第九世代", region: "帕底亞" },
+      ];
+
+      const gen1PokemonData = [
+        { id: 1, name: "妙蛙種子", rarity: "超稀有", rate: "6.00", min: 1, max: 15 },
+        { id: 2, name: "妙蛙草", rarity: "超稀有", rate: "3.60", min: 16, max: 31 },
+        { id: 3, name: "妙蛙花", rarity: "超稀有", rate: "0.40", min: 32, max: 49 },
+        { id: 4, name: "小火龍", rarity: "超稀有", rate: "6.00", min: 1, max: 15 },
+        { id: 5, name: "火恐龍", rarity: "超稀有", rate: "3.60", min: 16, max: 31 },
+        { id: 6, name: "噴火龍", rarity: "超稀有", rate: "0.40", min: 32, max: 49 },
+        { id: 7, name: "傑尼龜", rarity: "超稀有", rate: "6.00", min: 1, max: 15 },
+        { id: 8, name: "卡咪龜", rarity: "超稀有", rate: "3.60", min: 16, max: 31 },
+        { id: 9, name: "水箭龜", rarity: "超稀有", rate: "0.40", min: 32, max: 49 },
+        { id: 10, name: "綠毛蟲", rarity: "常見", rate: "7.00", min: 1, max: 7 },
+        { id: 11, name: "鐵甲蛹", rarity: "常見", rate: "2.00", min: 6, max: 9 },
+        { id: 12, name: "巴大蝶", rarity: "常見", rate: "1.00", min: 10, max: 30 },
+        { id: 13, name: "獨角蟲", rarity: "常見", rate: "7.00", min: 1, max: 6 },
+        { id: 14, name: "鐵殼蛹", rarity: "常見", rate: "2.00", min: 7, max: 9 },
+        { id: 15, name: "大針蜂", rarity: "常見", rate: "1.00", min: 10, max: 30 },
+        { id: 16, name: "波波", rarity: "常見", rate: "9.00", min: 1, max: 15 },
+        { id: 17, name: "比比鳥", rarity: "常見", rate: "0.90", min: 18, max: 35 },
+        { id: 18, name: "大比鳥", rarity: "常見", rate: "0.10", min: 36, max: 48 },
+        { id: 19, name: "小拉達", rarity: "常見", rate: "9.00", min: 1, max: 19 },
+        { id: 20, name: "拉達", rarity: "常見", rate: "1.00", min: 20, max: 39 },
+        { id: 21, name: "烈雀", rarity: "常見", rate: "9.00", min: 1, max: 15 },
+        { id: 22, name: "大嘴雀", rarity: "常見", rate: "1.00", min: 20, max: 40 },
+        { id: 23, name: "阿柏蛇", rarity: "常見", rate: "4.05", min: 4, max: 21 },
+        { id: 24, name: "阿柏怪", rarity: "常見", rate: "0.45", min: 22, max: 45 },
+        { id: 25, name: "皮卡丘", rarity: "普通", rate: "0.71", min: 16, max: 26 },
+        { id: 26, name: "雷丘", rarity: "普通", rate: "0.05", min: 27, max: 49 },
+        { id: 27, name: "穿山鼠", rarity: "常見", rate: "9.00", min: 5, max: 21 },
+        { id: 28, name: "穿山王", rarity: "常見", rate: "1.00", min: 22, max: 45 },
+        { id: 29, name: "尼多蘭", rarity: "普通", rate: "8.40", min: 3, max: 28 },
+        { id: 30, name: "尼多娜", rarity: "普通", rate: "1.52", min: 16, max: 37 },
+        { id: 31, name: "尼多后", rarity: "普通", rate: "0.08", min: 37, max: 51 },
+        { id: 32, name: "尼多朗", rarity: "普通", rate: "8.40", min: 3, max: 28 },
+        { id: 33, name: "尼多力諾", rarity: "普通", rate: "1.52", min: 16, max: 37 },
+        { id: 34, name: "尼多王", rarity: "普通", rate: "0.08", min: 37, max: 51 },
+        { id: 35, name: "皮皮", rarity: "普通", rate: "1.52", min: 17, max: 26 },
+        { id: 36, name: "皮可西", rarity: "普通", rate: "0.08", min: 27, max: 45 },
+        { id: 37, name: "六尾", rarity: "普通", rate: "5.52", min: 5, max: 24 },
+        { id: 38, name: "九尾", rarity: "普通", rate: "0.48", min: 25, max: 45 },
+        { id: 39, name: "胖丁", rarity: "常見", rate: "0.95", min: 16, max: 26 },
+        { id: 40, name: "胖可丁", rarity: "常見", rate: "0.05", min: 27, max: 44 },
+        { id: 41, name: "超音蝠", rarity: "常見", rate: "1.80", min: 1, max: 21 },
+        { id: 42, name: "大嘴蝠", rarity: "常見", rate: "0.18", min: 22, max: 45 },
+        { id: 43, name: "走路草", rarity: "常見", rate: "9.00", min: 1, max: 15 },
+        { id: 44, name: "臭臭花", rarity: "常見", rate: "0.95", min: 21, max: 39 },
+        { id: 45, name: "霸王花", rarity: "常見", rate: "0.05", min: 41, max: 49 },
+        { id: 46, name: "派拉斯", rarity: "普通", rate: "8.40", min: 1, max: 15 },
+        { id: 47, name: "派拉斯特", rarity: "普通", rate: "1.60", min: 24, max: 40 },
+        { id: 48, name: "毛球", rarity: "常見", rate: "5.40", min: 6, max: 30 },
+        { id: 49, name: "摩魯蛾", rarity: "常見", rate: "0.60", min: 31, max: 45 },
+        { id: 50, name: "地鼠", rarity: "常見", rate: "9.00", min: 2, max: 25 },
+        { id: 51, name: "三地鼠", rarity: "常見", rate: "1.00", min: 26, max: 45 },
+        { id: 52, name: "喵喵", rarity: "常見", rate: "9.00", min: 4, max: 27 },
+        { id: 53, name: "貓老大", rarity: "常見", rate: "1.00", min: 28, max: 45 },
+        { id: 54, name: "可達鴨", rarity: "常見", rate: "5.40", min: 7, max: 32 },
+        { id: 55, name: "哥達鴨", rarity: "常見", rate: "0.60", min: 33, max: 49 },
+        { id: 56, name: "猴怪", rarity: "常見", rate: "5.40", min: 6, max: 27 },
+        { id: 57, name: "火爆猴", rarity: "常見", rate: "0.54", min: 28, max: 45 },
+        { id: 58, name: "卡蒂狗", rarity: "普通", rate: "9.20", min: 10, max: 29 },
+        { id: 59, name: "風速狗", rarity: "普通", rate: "0.80", min: 30, max: 45 },
+        { id: 60, name: "蚊香蝌蚪", rarity: "常見", rate: "9.00", min: 5, max: 24 },
+        { id: 61, name: "蚊香君", rarity: "常見", rate: "0.95", min: 25, max: 35 },
+        { id: 62, name: "蚊香泳士", rarity: "常見", rate: "0.05", min: 36, max: 49 },
+        { id: 63, name: "凱西", rarity: "稀有", rate: "7.50", min: 1, max: 15 },
+        { id: 64, name: "勇基拉", rarity: "稀有", rate: "2.38", min: 16, max: 39 },
+        { id: 65, name: "胡地", rarity: "稀有", rate: "0.13", min: 41, max: 49 },
+        { id: 66, name: "腕力", rarity: "常見", rate: "5.40", min: 6, max: 27 },
+        { id: 67, name: "豪力", rarity: "常見", rate: "0.57", min: 28, max: 39 },
+        { id: 68, name: "怪力", rarity: "常見", rate: "0.03", min: 40, max: 49 },
+        { id: 69, name: "喇叭芽", rarity: "常見", rate: "9.00", min: 1, max: 15 },
+        { id: 70, name: "口呆花", rarity: "常見", rate: "0.95", min: 21, max: 39 },
+        { id: 71, name: "大食花", rarity: "常見", rate: "0.05", min: 41, max: 49 },
+        { id: 72, name: "瑪瑙水母", rarity: "常見", rate: "9.00", min: 9, max: 29 },
+        { id: 73, name: "毒刺水母", rarity: "常見", rate: "1.00", min: 30, max: 49 },
+        { id: 74, name: "小拳石", rarity: "常見", rate: "9.00", min: 5, max: 24 },
+        { id: 75, name: "隆隆石", rarity: "常見", rate: "0.95", min: 25, max: 39 },
+        { id: 76, name: "隆隆岩", rarity: "常見", rate: "0.05", min: 40, max: 49 },
+        { id: 77, name: "小火馬", rarity: "普通", rate: "5.04", min: 16, max: 39 },
+        { id: 78, name: "烈焰馬", rarity: "普通", rate: "0.96", min: 40, max: 49 },
+        { id: 79, name: "呆呆獸", rarity: "常見", rate: "5.40", min: 7, max: 29 },
+        { id: 80, name: "呆殼獸", rarity: "常見", rate: "0.45", min: 37, max: 49 },
+        { id: 81, name: "小磁怪", rarity: "普通", rate: "8.40", min: 8, max: 29 },
+        { id: 82, name: "三合一磁怪", rarity: "普通", rate: "15.20", min: 30, max: 45 },
+        { id: 83, name: "大蔥鴨", rarity: "常見", rate: "10.00", min: 10, max: 25 },
+        { id: 84, name: "嘟嘟", rarity: "常見", rate: "9.00", min: 6, max: 30 },
+        { id: 85, name: "嘟嘟利", rarity: "常見", rate: "1.00", min: 31, max: 45 },
+        { id: 86, name: "小海獅", rarity: "常見", rate: "9.00", min: 11, max: 30 },
+        { id: 87, name: "白海獅", rarity: "常見", rate: "1.00", min: 31, max: 48 },
+        { id: 88, name: "臭泥", rarity: "普通", rate: "8.40", min: 14, max: 37 },
+        { id: 89, name: "臭臭泥", rarity: "普通", rate: "1.60", min: 38, max: 49 },
+        { id: 90, name: "大舌貝", rarity: "常見", rate: "9.00", min: 11, max: 35 },
+        { id: 91, name: "刺甲貝", rarity: "常見", rate: "1.00", min: 36, max: 49 },
+        { id: 92, name: "鬼斯", rarity: "普通", rate: "8.40", min: 6, max: 24 },
+        { id: 93, name: "鬼斯通", rarity: "普通", rate: "1.52", min: 25, max: 45 },
+        { id: 94, name: "耿鬼", rarity: "普通", rate: "0.08", min: 46, max: 55 },
+        { id: 95, name: "大岩蛇", rarity: "普通", rate: "10.00", min: 12, max: 41 },
+        { id: 96, name: "素利普", rarity: "常見", rate: "5.40", min: 8, max: 25 },
+        { id: 97, name: "素利拍", rarity: "常見", rate: "0.60", min: 26, max: 45 },
+        { id: 98, name: "大鉗蟹", rarity: "常見", rate: "9.00", min: 5, max: 27 },
+        { id: 99, name: "巨鉗蟹", rarity: "常見", rate: "1.00", min: 28, max: 45 },
+        { id: 100, name: "雷電球", rarity: "普通", rate: "9.20", min: 12, max: 29 },
+        { id: 101, name: "頑皮雷彈", rarity: "普通", rate: "0.80", min: 30, max: 45 },
+        { id: 102, name: "蛋蛋", rarity: "普通", rate: "8.40", min: 14, max: 39 },
+        { id: 103, name: "椰蛋樹", rarity: "普通", rate: "1.60", min: 40, max: 49 },
+        { id: 104, name: "卡拉卡拉", rarity: "常見", rate: "9.00", min: 12, max: 27 },
+        { id: 105, name: "嘎啦嘎啦", rarity: "常見", rate: "1.00", min: 28, max: 45 },
+        { id: 106, name: "飛腿郎", rarity: "普通", rate: "0.32", min: 20, max: 46 },
+        { id: 107, name: "快拳郎", rarity: "普通", rate: "0.32", min: 20, max: 46 },
+        { id: 108, name: "大舌頭", rarity: "普通", rate: "1.68", min: 14, max: 39 },
+        { id: 109, name: "瓦斯彈", rarity: "常見", rate: "1.80", min: 9, max: 34 },
+        { id: 110, name: "雙彈瓦斯", rarity: "常見", rate: "0.20", min: 35, max: 49 },
+        { id: 111, name: "獨角犀牛", rarity: "常見", rate: "1.00", min: 10, max: 41 },
+        { id: 112, name: "鑽角犀獸", rarity: "常見", rate: "0.19", min: 42, max: 49 },
+        { id: 113, name: "吉利蛋", rarity: "稀有", rate: "1.13", min: 17, max: 45 },
+        { id: 114, name: "蔓藤怪", rarity: "常見", rate: "1.80", min: 19, max: 45 },
+        { id: 115, name: "袋獸", rarity: "稀有", rate: "10.00", min: 24, max: 49 },
+        { id: 116, name: "墨海馬", rarity: "常見", rate: "1.80", min: 5, max: 30 },
+        { id: 117, name: "海刺龍", rarity: "常見", rate: "0.19", min: 32, max: 44 },
+        { id: 118, name: "角金魚", rarity: "常見", rate: "9.00", min: 7, max: 32 },
+        { id: 119, name: "金魚王", rarity: "常見", rate: "1.00", min: 33, max: 45 },
+        { id: 120, name: "海星星", rarity: "普通", rate: "9.20", min: 9, max: 29 },
+        { id: 121, name: "寶石海星", rarity: "普通", rate: "0.80", min: 30, max: 49 },
+        { id: 122, name: "魔牆人偶", rarity: "普通", rate: "0.32", min: 26, max: 45 },
+        { id: 123, name: "飛天螳螂", rarity: "稀有", rate: "1.75", min: 25, max: 50 },
+        { id: 124, name: "迷唇姐", rarity: "普通", rate: "0.32", min: 30, max: 49 },
+        { id: 125, name: "電擊獸", rarity: "普通", rate: "0.30", min: 30, max: 49 },
+        { id: 126, name: "鴨嘴火獸", rarity: "常見", rate: "0.95", min: 30, max: 49 },
+        { id: 127, name: "凱羅斯", rarity: "稀有", rate: "10.00", min: 25, max: 50 },
+        { id: 128, name: "肯泰羅", rarity: "常見", rate: "2.00", min: 24, max: 49 },
+        { id: 129, name: "鯉魚王", rarity: "常見", rate: "9.90", min: 1, max: 19 },
+        { id: 130, name: "暴鯉龍", rarity: "常見", rate: "0.10", min: 20, max: 49 },
+        { id: 131, name: "拉普拉斯", rarity: "普通", rate: "2.00", min: 29, max: 49 },
+        { id: 132, name: "百變怪", rarity: "稀有", rate: "10.00", min: 4, max: 29 },
+        { id: 133, name: "伊布", rarity: "超稀有", rate: "4.80", min: 5, max: 27 },
+        { id: 134, name: "水伊布", rarity: "超稀有", rate: "1.20", min: 28, max: 49 },
+        { id: 135, name: "雷伊布", rarity: "超稀有", rate: "1.20", min: 28, max: 49 },
+        { id: 136, name: "火伊布", rarity: "超稀有", rate: "1.20", min: 28, max: 49 },
+        { id: 137, name: "多邊獸", rarity: "普通", rate: "9.20", min: 15, max: 40 },
+        { id: 138, name: "菊石獸", rarity: "超稀有", rate: "6.00", min: 11, max: 36 },
+        { id: 139, name: "多刺菊石獸", rarity: "超稀有", rate: "4.00", min: 40, max: 50 },
+        { id: 140, name: "化石盔", rarity: "超稀有", rate: "6.00", min: 11, max: 36 },
+        { id: 141, name: "鐮刀盔", rarity: "超稀有", rate: "4.00", min: 40, max: 50 },
+        { id: 142, name: "化石翼龍", rarity: "超稀有", rate: "10.00", min: 27, max: 52 },
+        { id: 143, name: "卡比獸", rarity: "稀有", rate: "2.50", min: 34, max: 49 },
+        { id: 144, name: "急凍鳥", rarity: "超稀有", rate: "0.10", min: 55, max: 70 },
+        { id: 145, name: "閃電鳥", rarity: "超稀有", rate: "0.10", min: 55, max: 70 },
+        { id: 146, name: "火焰鳥", rarity: "超稀有", rate: "0.10", min: 55, max: 70 },
+        { id: 147, name: "迷你龍", rarity: "稀有", rate: "7.50", min: 5, max: 29 },
+        { id: 148, name: "哈克龍", rarity: "稀有", rate: "2.25", min: 30, max: 49 },
+        { id: 149, name: "快龍", rarity: "稀有", rate: "0.25", min: 55, max: 60 },
+        { id: 150, name: "超夢", rarity: "超稀有", rate: "0.10", min: 55, max: 70 },
+        { id: 151, name: "夢幻", rarity: "超稀有", rate: "0.10", min: 55, max: 70 }
+      ];
+
+      const locationDetails = {
+        "新守村": {
+          title: "新守村",
+          type: "新手村落",
+          description: "所有新玩家踏入海根寶可夢世界的第一站。這裡環境安全，氣候宜人，村長與村民們非常熱情，會引導你學習基本的生存與寶可夢知識。",
+          data: {
+            npc: [
+              { name: "大林博士", role: "寶可夢博士", desc: "引導新手，發放初始寶可夢與圖鑑。" },
+              { name: "小林", role: "博士助手", desc: "協助博士進行研究，提供基礎教學與任務。" },
+              { name: "敲伊小姐", role: "寶可夢護士", desc: "負責治療與恢復你受傷的寶可夢。" },
+              { name: "敲尼小姐", role: "商店店員", desc: "販售各式精靈球、傷藥與基礎生存物資。" },
+              { name: "敲參小姐", role: "任務接待", desc: "提供新手日常任務與地區情報。" },
+              { name: "背包客", role: "旅行者", desc: "分享在曠野地帶探險的實用經驗與小知識。" },
+              { name: "鍛球工匠", role: "工匠", desc: "教導如何使用圓柑果實製作特殊的精靈球。" },
+              { name: "球匠學徒", role: "學徒", desc: "收購各種果實，並販售基礎的精靈球零件。" },
+              { name: "黑科技科學家", role: "研究員", desc: "提供寶可夢個體值與努力值的查看與教學。" },
+              { name: "寶可夢少年", role: "訓練家", desc: "隨時準備好進行新手對戰，是測試實力的好對手！" },
+              { name: "礦工", role: "資源收集", desc: "傳授挖礦技巧，並可交換一些稀有的進化石碎片。" },
+              { name: "黑市商人", role: "神秘商人", desc: "行蹤神秘，偶爾會販售一些稀奇古怪的罕見道具。" }
+            ],
+            pokemon: [], 
+            berry: [] 
+          }
+        },
+        "玩家大廳": {
+          title: "玩家大廳",
+          type: "主城設施",
+          description: "海根市的核心建築，是伺服器最熱鬧的交誼廳。設有各大系統的快捷入口與玩家交流區。",
+          data: {
+            npc: [
+              { name: "活動大使", role: "節慶活動", desc: "發布限時活動資訊與兌換活動專屬獎勵。" },
+              { name: "市集管理員", role: "交易系統", desc: "指導玩家如何租賃攤位或使用全球拍賣系統。" }
+            ],
+            pokemon: [], 
+            berry: [] 
+          }
+        },
+        "穿山峽谷": {
+          title: "穿山峽谷",
+          type: "洞窟與峽谷地形",
+          description: "地勢險峻的峽谷地帶，兩側岩壁上生長著許多特殊的岩生植物與果樹。",
+          data: {
+            npc: [
+              { name: "果實獵人", role: "資源採集者", desc: "在險峻的峽谷中尋找珍稀的果實，或許可以向他打聽稀有果樹的位置或進行交易。" }
+            ],
+            pokemon: [], 
+            berry: [] 
+          }
+        },
+        "寒冰迷宮": {
+          title: "寒冰迷宮",
+          type: "洞窟與峽谷地形",
+          description: "終年結冰的地下迷宮，寒氣逼人，道路錯綜複雜，據說隱藏著古代的秘密。",
+          data: {
+            npc: [
+              { name: "三尾木木犬", role: "迷宮嚮導", desc: "一隻神奇的木製機關犬，似乎對迷宮的路線瞭若指掌，或許能提供破關的線索。" }
+            ],
+            pokemon: [], 
+            berry: [] 
+          }
+        },
+        "輕盈河道": {
+          title: "輕盈河道",
+          type: "山道、河流與村落",
+          description: "水流平緩清澈的河道，水草豐美，是許多水屬性寶可夢棲息的樂園。",
+          data: {
+            npc: [
+              { name: "神秘漁夫", role: "釣魚大師", desc: "總是安靜地坐在河邊釣魚，聽說他掌握著釣起傳說中水屬性寶可夢的秘訣。" }
+            ],
+            pokemon: [], 
+            berry: [] 
+          }
+        },
+        "角鬥草原": {
+          title: "角鬥草原",
+          type: "森林與草原地形",
+          description: "廣闊無垠的草原，過去似乎是古代寶可夢戰鬥的競技場，至今仍遺留著許多古老的遺跡。",
+          data: {
+            npc: [
+              { name: "遺跡探索者", role: "考古學家", desc: "熱衷於研究草原上的古代遺跡，如果你找到了什麼奇怪的石板，可以拿給他看看。" }
+            ],
+            pokemon: [], 
+            berry: [] 
+          }
+        },
+        "龍門湖": {
+          title: "龍門湖",
+          type: "山道、河流與村落",
+          description: "深不見底的巨大湖泊，傳說在湖底沉睡著強大的龍屬性寶可夢，湖面時常籠罩著神秘的薄霧。",
+          data: {
+            npc: [
+              { name: "湖邊老人", role: "湖泊守護者", desc: "世世代代居住在湖邊的老人，知曉關於龍門湖的古老傳說與禁忌。" }
+            ],
+            pokemon: [], 
+            berry: [] 
+          }
+        },
+        "入天叢林": {
+          title: "入天叢林",
+          type: "森林與草原地形",
+          description: "樹木高聳入雲的茂密叢林，陽光難以穿透樹冠，充滿了未知的危險與奇特的生態系。",
+          data: {
+            npc: [
+              { name: "寶可夢學者", role: "生態觀察家", desc: "為了研究叢林中獨特的蟲屬性與草屬性寶可夢而在此紮營，會發布相關的觀察任務。" }
+            ],
+            pokemon: [], 
+            berry: [] 
+          }
+        },
+        "火紅小徑": {
+          title: "火紅小徑",
+          type: "森林與草原地形",
+          description: "小徑兩旁長滿了赤紅色的植物與落葉，宛如燃燒的火焰。這裡彌漫著一股神祕的氣息，傳說這條路連接著現世與未知的領域。",
+          data: {
+            npc: [
+              { name: "送神", role: "神秘引路人", desc: "一位靜靜佇立在小徑深處的神祕人物，似乎在主持某種古老的儀式，或許能為迷失的訓練家指引前往特殊祭壇的方向。" }
+            ],
+            pokemon: [], 
+            berry: [] 
+          }
+        }
+      };
+
+      const handleLocationClick = (name) => {
+        if (locationDetails[name]) {
+          setSelectedLocation(locationDetails[name]);
+          setActiveSubTab('npc');
+        } else {
+          setSelectedLocation({
+            title: name,
+            type: "未知區域",
+            description: "此區域的詳細資訊仍在調查與建置中，敬請期待未來更新！",
+            data: { npc: [], pokemon: [], berry: [] }
+          });
+          setActiveSubTab('npc');
+        }
+      };
+
+      const handleTabChange = (id) => {
+        setActiveTab(id);
+        setSelectedLocation(null);
+        setIsPokeballModalOpen(false); 
+        setIsPokedexModalOpen(false);  
+      };
+
+      return (
+        <div>
+          {/* 導覽列 */}
+          <nav className="bg-white shadow-md sticky top-0 z-50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex justify-between items-center h-20">
+                <div className="flex items-center flex-shrink-0">
+                  <div className="flex items-center gap-3 cursor-pointer" onClick={() => handleTabChange('info')}>
+                    <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center text-white shadow-inner transform rotate-3">
+                      <Icon name="cat" size={24} />
+                    </div>
+                    <span className="font-bold text-2xl tracking-wide text-emerald-800 hidden sm:block">
+                      海根寶可夢伺服器
+                    </span>
+                    <span className="font-bold text-xl tracking-wide text-emerald-800 sm:hidden">
+                      海根寶可夢
+                    </span>
+                  </div>
+                </div>
+
+                <div className="hidden lg:flex flex-1 justify-center items-center space-x-2 px-4">
+                  {navItems.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => handleTabChange(item.id)}
+                      className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-bold transition-all ${
+                        activeTab === item.id
+                          ? 'bg-emerald-100 text-emerald-700 shadow-sm'
+                          : 'text-gray-600 hover:bg-gray-100 hover:text-emerald-600'
+                      }`}
+                    >
+                      <Icon name={item.iconName} size={20} />
+                      <span>{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="lg:hidden flex items-center">
+                  <button 
+                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                    className="text-gray-600 hover:text-emerald-600 focus:outline-none p-2 rounded-lg bg-gray-50"
+                  >
+                    {isMobileMenuOpen ? <Icon name="x" size={28} /> : <Icon name="menu" size={28} />}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {isMobileMenuOpen && (
+              <div className="lg:hidden bg-white border-t border-gray-100 px-4 pt-4 pb-4 shadow-lg absolute w-full">
+                <div className="grid grid-cols-2 gap-2 mb-4">
+                  {navItems.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => { handleTabChange(item.id); setIsMobileMenuOpen(false); }}
+                      className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-bold transition-all ${
+                        activeTab === item.id
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                      }`}
+                    >
+                      <Icon name={item.iconName} size={18} />
+                      <span>{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+                <div className="space-y-2 border-t border-gray-100 pt-4">
+                  {externalLinks.map((link, index) => (
+                    <a
+                      key={index}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`${link.color.replace('/90', '')} text-white block px-4 py-3 rounded-lg font-bold flex items-center justify-center gap-2`}
+                    >
+                      <Icon name={link.iconName} size={20} />
+                      <span>{link.label}</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+          </nav>
+
+          {/* Hero 區塊 (圖片背景) */}
+          <div 
+            className="relative overflow-hidden pt-8 pb-36 sm:pt-12 sm:pb-48 bg-gray-900"
+            style={{
+              backgroundImage: `url('./1000000873.png'), url('https://images.unsplash.com/photo-1607988795691-3d0147b43231?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat'
+            }}
+          >
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent"></div>
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 h-full flex flex-col">
+              <div className="hidden lg:flex justify-end gap-3 mb-12">
+                {externalLinks.map((link, index) => (
+                  <a
+                    key={index}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`${link.color} text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg backdrop-blur-sm border border-white/20 hover:-translate-y-1`}
+                  >
+                    <Icon name={link.iconName} size={18} />
+                    <span>{link.label}</span>
+                  </a>
+                ))}
+              </div>
+
+              <div className="text-center mt-auto mb-auto lg:mt-0">
+                <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-4 tracking-tight drop-shadow-xl">
+                  歡迎來到 <span className="text-emerald-400">海根寶可夢</span> 的世界
+                </h1>
+                <p className="text-lg sm:text-xl text-gray-100 mb-8 max-w-2xl mx-auto font-medium drop-shadow-md">
+                  結合 Minecraft 的自由建造與寶可夢的收集養成，立即下載專屬模組包，與我們一起踏上成為寶可夢大師的旅程！
+                </p>
+                
+                <div className="inline-flex flex-col sm:flex-row items-center bg-gray-900/60 backdrop-blur-md rounded-2xl p-2 border border-emerald-500/50 shadow-2xl">
+                  <div className="px-6 py-3 text-emerald-50 font-mono text-lg sm:text-xl tracking-wider select-all">
+                    {serverIP}
+                  </div>
+                  <button
+                    onClick={copyToClipboard}
+                    className={`mt-2 sm:mt-0 w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold transition-all ${
+                      copied 
+                        ? 'bg-emerald-500 text-white' 
+                        : 'bg-emerald-400 text-gray-900 hover:bg-emerald-300'
+                    }`}
+                  >
+                    {copied ? (
+                      <React.Fragment><Icon name="check" size={20} /> 已複製</React.Fragment>
+                    ) : (
+                      <React.Fragment><Icon name="copy" size={20} /> 複製 IP</React.Fragment>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 主要內容區 */}
+          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 -mt-20 sm:-mt-32 pb-16">
+            <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-10 min-h-[500px] relative z-20 border border-gray-100 overflow-hidden">
+              
+              {/* --- 1. 資訊 Tab --- */}
+              {activeTab === 'info' && (
+                <div className="animate-fadeIn">
+                  <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                    <Icon name="info" className="text-emerald-500" size={32} /> 伺服器簡介與規範
+                  </h2>
+                   <div className="bg-emerald-50 rounded-xl p-6 border-l-4 border-emerald-500">
+                      <h3 className="text-xl font-bold text-emerald-800 mb-2">🎈 關於海根寶可夢</h3>
+                      <p>
+                        海根寶可夢伺服器致力於打造一個友善、穩定且充滿探索樂趣的 Minecraft 寶可夢生態。
+                        我們使用了精緻的 Cobblemon 模組，保留了原版 Minecraft 的方塊美學，同時完美融入了寶可夢的捕捉、戰鬥與培育系統。
+                      </p>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-6 mt-8">
+                      <div className="border border-gray-200 rounded-xl p-6 hover:shadow-md transition bg-white">
+                        <h4 className="font-bold text-lg text-gray-800 mb-4 flex items-center gap-2">
+                          <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">1</span> 如何加入伺服器？
+                        </h4>
+                        <ul className="space-y-3 list-disc list-inside text-gray-600">
+                          <li>點擊右上角「模組包下載」取得專屬檔案。</li>
+                          <li>將模組包安裝至您的 Minecraft 啟動器。</li>
+                          <li>啟動遊戲，輸入 IP：<code className="bg-gray-100 px-2 py-1 rounded text-emerald-600">{serverIP}</code>。</li>
+                        </ul>
+                      </div>
+                      <div className="border border-gray-200 rounded-xl p-6 hover:shadow-md transition bg-white">
+                        <h4 className="font-bold text-lg text-gray-800 mb-4 flex items-center gap-2">
+                          <span className="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center">2</span> 基本伺服器規範
+                        </h4>
+                        <ul className="space-y-3 list-disc list-inside text-gray-600">
+                          <li>請互相尊重，嚴禁任何形式的謾罵、歧視與騷擾。</li>
+                          <li>嚴禁使用外掛、作弊客戶端或利用惡意 Bug 獲利。</li>
+                          <li>請勿惡意破壞他人建築或未經同意拿取他人財物。</li>
+                        </ul>
+                      </div>
+                    </div>
+                </div>
+              )}
+
+              {/* --- 2. 地圖 Tab --- */}
+              {activeTab === 'map' && (
+                <div className="animate-fadeIn h-full flex flex-col">
+                  <h2 className="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-3">
+                    <Icon name="map" className="text-emerald-500" size={32} /> 伺服器探險地圖
+                  </h2>
+                  <p className="text-gray-600 mb-6">
+                    歡迎來到海根寶可夢的廣大世界！這裡記錄了目前已知的城鎮、荒野與神祕地標。準備好你的精靈球，隨時踏上未知的旅程吧！
+                  </p>
+                  
+                  <div className="flex-grow bg-gray-100 rounded-2xl border-2 border-gray-200 relative overflow-hidden group min-h-[400px] sm:min-h-[500px]">
+                    <img 
+                      src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80" 
+                      alt="伺服器地圖" 
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent opacity-80"></div>
+                    
+                    <div className="absolute bottom-0 left-0 w-full p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+                      <div className="text-white text-center sm:text-left">
+                        <h3 className="text-2xl font-bold mb-1 shadow-black drop-shadow-md">海根地區全貌</h3>
+                        <p className="text-gray-200 text-sm shadow-black drop-shadow-md">包含新守村、龍門湖與各大神殿位置</p>
+                      </div>
+                      
+                      <button className="bg-white/20 backdrop-blur-md border border-white/40 text-white px-6 py-2.5 rounded-full font-bold hover:bg-white hover:text-gray-900 transition-all shadow-lg flex items-center gap-2">
+                        <Icon name="search" size={18} />
+                        查看高畫質地圖
+                      </button>
+                    </div>
+
+                    <div className="absolute top-4 right-4 bg-emerald-500/90 backdrop-blur-sm text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-md flex items-center gap-1">
+                      <Icon name="info" size={14} /> 點擊可放大地圖
+                    </div>
+                  </div>
+
+                  <div className="mt-6 bg-blue-50 border border-blue-100 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <div className="bg-blue-100 p-2 rounded-lg text-blue-600 flex-shrink-0">
+                      <Icon name="compass" size={24} />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-blue-800">遊戲內地圖導航</h4>
+                      <p className="text-sm text-blue-600/80 mt-1">
+                        強烈建議玩家在安裝模組包時，確保 <strong>Xaero's World Map</strong> 或 <strong>JourneyMap</strong> 已啟用，方便在遊戲中隨時按下快速鍵查看自身位置與標記家園！
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* --- 3. 寶可夢資訊 Tab --- */}
+              {activeTab === 'pokemon' && (
+                <div className="animate-fadeIn">
+                  <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                    <Icon name="cat" className="text-emerald-500" size={32} /> 寶可夢生態系統
+                  </h2>
+                  
+                  <div className="grid sm:grid-cols-2 gap-6">
+                    
+                    <div 
+                      onClick={() => { setIsPokedexModalOpen(true); setActiveGen(1); }}
+                      className="bg-white border border-gray-100 shadow-sm rounded-xl overflow-hidden hover:-translate-y-1 hover:shadow-lg transition duration-300 cursor-pointer group"
+                    >
+                      <div className="h-32 bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center text-white relative">
+                        <Icon name="cat" size={48} className="opacity-80 drop-shadow-md transform group-hover:scale-110 transition-transform duration-300" />
+                        <div className="absolute bottom-3 right-3 text-xs bg-black/30 px-3 py-1 rounded-full opacity-80 group-hover:opacity-100 transition backdrop-blur-sm flex items-center gap-1 font-medium">
+                          點擊查看全世代圖鑑 <Icon name="arrow-left" size={12} className="transform rotate-180" />
+                        </div>
+                      </div>
+                      <div className="p-6">
+                        <h3 className="font-bold text-xl mb-2 text-gray-800">寶可夢世代</h3>
+                        <p className="text-gray-600 text-sm leading-relaxed">
+                          伺服器搭載最新版本的 Cobblemon 模組，完整收錄了第一世代到最新世代的豐富寶可夢！點擊即可查看各世代的詳細出現率與等級範圍。
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="bg-white border border-gray-100 shadow-sm rounded-xl overflow-hidden hover:-translate-y-1 hover:shadow-lg transition duration-300">
+                      <div className="h-32 bg-gradient-to-br from-cyan-400 to-cyan-600 flex items-center justify-center text-white">
+                        <Icon name="beaker" size={48} className="opacity-80 drop-shadow-md" />
+                      </div>
+                      <div className="p-6">
+                        <h3 className="font-bold text-xl mb-2 text-gray-800">藥劑系統</h3>
+                        <p className="text-gray-600 text-sm leading-relaxed">
+                          除了依靠護士喬伊，玩家還可以利用收集到的材料與基礎藥水，自行合成各種傷藥、解毒藥與活力塊，在艱難的野外探險中隨時保持戰力。
+                        </p>
+                      </div>
+                    </div>
+
+                    <div 
+                      onClick={() => setIsPokeballModalOpen(true)}
+                      className="bg-white border border-gray-100 shadow-sm rounded-xl overflow-hidden hover:-translate-y-1 hover:shadow-lg transition duration-300 cursor-pointer group"
+                    >
+                      <div className="h-32 bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center text-white relative">
+                        <div className="w-16 h-16 rounded-full border-[3px] border-white bg-white relative overflow-hidden flex items-center justify-center shadow-lg transform -rotate-12 group-hover:scale-110 transition-transform duration-300">
+                           <div className="absolute top-0 w-full h-1/2 bg-red-500"></div>
+                           <div className="absolute w-full h-1.5 bg-gray-800"></div>
+                           <div className="absolute w-5 h-5 rounded-full border-4 border-gray-800 bg-white z-10"></div>
+                        </div>
+                        <div className="absolute bottom-3 right-3 text-xs bg-black/30 px-3 py-1 rounded-full opacity-80 group-hover:opacity-100 transition backdrop-blur-sm flex items-center gap-1 font-medium">
+                          點擊查看捕獲率圖鑑 <Icon name="arrow-left" size={12} className="transform rotate-180" />
+                        </div>
+                      </div>
+                      <div className="p-6">
+                        <h3 className="font-bold text-xl mb-2 text-gray-800">寶可夢球種類</h3>
+                        <p className="text-gray-600 text-sm leading-relaxed">
+                          伺服器內包含多種特色寶可夢球！不同的寶可夢球擁有獨特的捕捉機率與特效，收集材料打造專屬你的精靈球吧。
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="bg-white border border-gray-100 shadow-sm rounded-xl overflow-hidden hover:-translate-y-1 hover:shadow-lg transition duration-300">
+                      <div className="h-32 bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white">
+                        <Icon name="utensils" size={48} className="opacity-80 drop-shadow-md" />
+                      </div>
+                      <div className="p-6">
+                        <h3 className="font-bold text-xl mb-2 text-gray-800">食材與料理</h3>
+                        <p className="text-gray-600 text-sm leading-relaxed">
+                          透過農耕、釣魚或採集獲取各式各樣的食材。結合新鮮食材與樹果，您可以為寶可夢製作美味的專屬料理，大幅提升牠們的親密度與各種狀態！
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                   <div className="mt-8 bg-emerald-50 rounded-xl p-6 border border-emerald-100">
+                    <h4 className="font-bold text-emerald-800 mb-2 flex items-center gap-2">
+                       <Icon name="info" size={18}/> 常用指令提示
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700">
+                      <div className="bg-white p-3 rounded-lg shadow-sm border border-gray-100"><code>/pc</code> - 開啟寶可夢電腦</div>
+                      <div className="bg-white p-3 rounded-lg shadow-sm border border-gray-100"><code>/pokeheal</code> - 治療隊伍</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* --- 4. 地區資訊 Tab --- */}
+              {activeTab === 'region' && (
+                <div className="animate-fadeIn h-full">
+                  {selectedLocation ? (
+                    <div className="animate-slideInRight h-full flex flex-col">
+                      <div className="flex items-center gap-4 mb-6">
+                        <button 
+                          onClick={() => setSelectedLocation(null)}
+                          className="p-3 bg-gray-100 hover:bg-emerald-100 hover:text-emerald-700 rounded-xl transition-colors text-gray-500 flex-shrink-0 flex items-center justify-center shadow-sm"
+                          title="返回地區總覽"
+                        >
+                          <Icon name="arrow-left" size={24} />
+                        </button>
+                        <div>
+                          <div className="flex items-center gap-3">
+                            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800">{selectedLocation.title}</h2>
+                            <span className="bg-emerald-100 text-emerald-800 text-sm px-3 py-1 rounded-full font-bold">
+                              {selectedLocation.type}
+                            </span>
+                          </div>
+                          <p className="text-gray-500 mt-2 text-sm sm:text-base">{selectedLocation.description}</p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-8 bg-gray-50 p-2 rounded-2xl border border-gray-100">
+                        <button
+                          onClick={() => setActiveSubTab('npc')}
+                          className={`flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 py-4 rounded-xl font-bold transition-all ${
+                            activeSubTab === 'npc'
+                              ? 'bg-white text-indigo-600 shadow-md ring-2 ring-indigo-100 transform scale-[1.02]'
+                              : 'text-gray-500 hover:bg-gray-100 hover:text-indigo-500'
+                          }`}
+                        >
+                          <div className={`p-2 rounded-lg ${activeSubTab === 'npc' ? 'bg-indigo-50' : 'bg-transparent'}`}>
+                            <Icon name="users" size={28} />
+                          </div>
+                          <span className="text-base sm:text-lg">NPC</span>
+                        </button>
+
+                        <button
+                          onClick={() => setActiveSubTab('pokemon')}
+                          className={`flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 py-4 rounded-xl font-bold transition-all ${
+                            activeSubTab === 'pokemon'
+                              ? 'bg-white text-emerald-600 shadow-md ring-2 ring-emerald-100 transform scale-[1.02]'
+                              : 'text-gray-500 hover:bg-gray-100 hover:text-emerald-500'
+                          }`}
+                        >
+                          <div className={`p-2 rounded-lg ${activeSubTab === 'pokemon' ? 'bg-emerald-50' : 'bg-transparent'}`}>
+                             <Icon name="cat" size={28} />
+                          </div>
+                          <span className="text-base sm:text-lg">寶可夢</span>
+                        </button>
+
+                        <button
+                          onClick={() => setActiveSubTab('berry')}
+                          className={`flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 py-4 rounded-xl font-bold transition-all ${
+                            activeSubTab === 'berry'
+                              ? 'bg-white text-rose-500 shadow-md ring-2 ring-rose-100 transform scale-[1.02]'
+                              : 'text-gray-500 hover:bg-gray-100 hover:text-rose-400'
+                          }`}
+                        >
+                          <div className={`p-2 rounded-lg ${activeSubTab === 'berry' ? 'bg-rose-50' : 'bg-transparent'}`}>
+                            <Icon name="apple" size={28} />
+                          </div>
+                          <span className="text-base sm:text-lg">果樹</span>
+                        </button>
+                      </div>
+
+                      <div className="flex-1 bg-white border border-gray-100 shadow-inner rounded-2xl p-6 min-h-[300px]">
+                        {activeSubTab === 'npc' && (
+                          <div className="animate-fadeIn">
+                            {selectedLocation.data.npc.length > 0 ? (
+                              <div className="grid md:grid-cols-2 gap-4">
+                                {selectedLocation.data.npc.map((npc, idx) => (
+                                  <div key={idx} className="bg-indigo-50/50 border border-indigo-100 p-5 rounded-xl flex gap-4 hover:bg-white hover:shadow-md transition">
+                                    <div className="w-12 h-12 bg-indigo-200 rounded-full flex items-center justify-center flex-shrink-0 text-indigo-800 font-bold text-xl shadow-sm">
+                                      {npc.name.charAt(0)}
+                                    </div>
+                                    <div>
+                                      <h4 className="font-bold text-gray-800 text-lg flex items-center gap-2 flex-wrap">
+                                        {npc.name}
+                                        <span className="text-xs font-bold text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded-md border border-indigo-200">
+                                          {npc.role}
+                                        </span>
+                                      </h4>
+                                      <p className="text-sm text-gray-600 mt-2">{npc.desc}</p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="flex flex-col items-center justify-center h-48 text-gray-400 bg-gray-50/50 rounded-xl border border-dashed border-gray-200">
+                                <Icon name="search" size={48} className="mb-4 opacity-50 text-indigo-400" />
+                                <p className="font-medium text-gray-600">此區域目前沒有發現特殊 NPC。</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {activeSubTab === 'pokemon' && (
+                          <div className="animate-fadeIn">
+                            {selectedLocation.data.pokemon.length > 0 ? (
+                              <div className="overflow-x-auto rounded-xl border border-emerald-100">
+                                <table className="w-full text-left border-collapse">
+                                  <thead>
+                                    <tr className="bg-emerald-50 text-emerald-800 font-bold border-b border-emerald-100">
+                                      <th className="p-4">寶可夢名稱</th>
+                                      <th className="p-4">屬性</th>
+                                      <th className="p-4">出沒時間</th>
+                                      <th className="p-4">稀有度</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {selectedLocation.data.pokemon.map((poke, idx) => (
+                                      <tr key={idx} className="border-b border-gray-50 hover:bg-emerald-50/30 transition">
+                                        <td className="p-4 font-bold text-gray-800 flex items-center gap-2">
+                                          <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs">IMG</div>
+                                          {poke.name}
+                                        </td>
+                                        <td className="p-4 text-sm text-gray-600">{poke.type}</td>
+                                        <td className="p-4 text-sm text-gray-600">{poke.time}</td>
+                                        <td className="p-4">
+                                          <span className={`text-xs px-2 py-1 rounded font-bold ${
+                                            poke.rarity === '常見' ? 'bg-gray-100 text-gray-600' : 'bg-yellow-100 text-yellow-700'
+                                          }`}>
+                                            {poke.rarity}
+                                          </span>
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            ) : (
+                              <div className="flex flex-col items-center justify-center h-48 text-gray-400 bg-gray-50/50 rounded-xl border border-dashed border-gray-200">
+                                <Icon name="search" size={48} className="mb-4 opacity-50 text-emerald-500" />
+                                <p className="font-medium text-gray-600">此區域似乎沒有野生寶可夢出沒。</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {activeSubTab === 'berry' && (
+                          <div className="animate-fadeIn">
+                            {selectedLocation.data.berry.length > 0 ? (
+                               <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                {selectedLocation.data.berry.map((berry, idx) => (
+                                  <div key={idx} className="bg-rose-50/50 border border-rose-100 p-4 rounded-xl flex items-center gap-4 hover:bg-white hover:shadow-md transition">
+                                    <div className="w-12 h-12 bg-rose-200 rounded-lg flex items-center justify-center flex-shrink-0 text-rose-600">
+                                      <Icon name="apple" size={24} />
+                                    </div>
+                                    <div>
+                                      <h4 className="font-bold text-gray-800">{berry.name}</h4>
+                                      <p className="text-xs text-rose-600 font-medium mb-1">{berry.effect}</p>
+                                      <span className="text-[10px] text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                                        生長速度: {berry.growth}
+                                      </span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="flex flex-col items-center justify-center h-48 text-gray-400 bg-gray-50/50 rounded-xl border border-dashed border-gray-200">
+                                <Icon name="search" size={48} className="mb-4 opacity-50 text-rose-400" />
+                                <p className="font-medium text-gray-600">此區域沒有發現可採摘的果樹。</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                      </div>
+                    </div>
+                  ) : (
+                  <div className="animate-fadeIn">
+                    <div className="mb-8 border-b border-gray-100 pb-6">
+                      <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800 mb-3 flex items-center gap-3">
+                        <Icon name="globe" className="text-emerald-500" size={36} />
+                        伺服器地區總覽
+                      </h2>
+                      <p className="text-gray-600 text-lg">點擊下方分類中的地標按鈕，即可查看該地點的 NPC、寶可夢與果樹等詳細資訊。</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                      
+                      <div className="space-y-6">
+                        <div className="bg-indigo-50/50 p-6 rounded-2xl border border-indigo-100 h-auto">
+                          <h3 className="text-xl font-bold text-indigo-800 mb-4 flex items-center gap-2 border-b border-indigo-200 pb-2">
+                            <Icon name="building" size={24} className="text-indigo-500" /> 特殊地標與建築
+                          </h3>
+                          <div className="grid grid-cols-2 gap-2">
+                            {["玩家大廳", "新守村"].map((name, i) => (
+                              <button 
+                                key={i} 
+                                onClick={() => handleLocationClick(name)}
+                                className="bg-white px-3 py-2.5 rounded-lg shadow-sm border border-indigo-100 text-indigo-900 font-medium text-sm hover:-translate-y-0.5 hover:shadow hover:bg-indigo-50 transition text-center"
+                              >
+                                {name}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200">
+                          <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2 border-b border-gray-300 pb-2">
+                            <Icon name="sparkles" size={24} className="text-yellow-500" /> 神話祭壇
+                          </h3>
+                          <div className="flex flex-col gap-3">
+                            <button onClick={() => handleLocationClick("冰結神殿")} className="bg-gradient-to-r from-blue-50 to-white border border-blue-200 rounded-xl p-3 flex justify-between items-center shadow-sm hover:shadow-md transition transform hover:-translate-x-1 w-full text-left">
+                              <span className="font-bold text-gray-800">冰結神殿</span>
+                              <span className="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded-md">❄️ 急凍鳥</span>
+                            </button>
+                            <button onClick={() => handleLocationClick("黑山神殿")} className="bg-gradient-to-r from-red-50 to-white border border-red-200 rounded-xl p-3 flex justify-between items-center shadow-sm hover:shadow-md transition transform hover:-translate-x-1 w-full text-left">
+                              <span className="font-bold text-gray-800">黑山神殿</span>
+                              <span className="text-xs font-bold text-red-600 bg-red-100 px-2 py-1 rounded-md">🔥 火焰鳥</span>
+                            </button>
+                            <button onClick={() => handleLocationClick("高原神殿")} className="bg-gradient-to-r from-yellow-50 to-white border border-yellow-300 rounded-xl p-3 flex justify-between items-center shadow-sm hover:shadow-md transition transform hover:-translate-x-1 w-full text-left">
+                              <span className="font-bold text-gray-800">高原神殿</span>
+                              <span className="text-xs font-bold text-yellow-600 bg-yellow-100 px-2 py-1 rounded-md">⚡ 雷電鳥</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-amber-50/50 p-6 rounded-2xl border border-amber-100">
+                        <h3 className="text-xl font-bold text-amber-800 mb-4 flex items-center gap-2 border-b border-amber-200 pb-2">
+                          <Icon name="mountain" size={24} className="text-amber-500" /> 洞窟與峽谷地形
+                        </h3>
+                        <div className="grid grid-cols-2 gap-2">
+                          {["堅岩洞窟", "堅岩洞窟深處", "穿山走廊", "穿山峽谷", "空懸峽谷", "廢棄實驗室", "寒冰迷宮"].map((name, i) => (
+                            <button 
+                              key={i} 
+                              onClick={() => handleLocationClick(name)}
+                              className="bg-white px-3 py-2.5 rounded-lg shadow-sm border border-amber-100 text-amber-900 font-medium text-sm hover:-translate-y-0.5 hover:shadow hover:bg-amber-50 transition text-center"
+                            >
+                              {name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="space-y-6">
+                        <div className="bg-emerald-50/50 p-6 rounded-2xl border border-emerald-100">
+                          <h3 className="text-xl font-bold text-emerald-800 mb-4 flex items-center gap-2 border-b border-emerald-200 pb-2">
+                            <Icon name="tree-pine" size={24} className="text-emerald-500" /> 森林與草原地形
+                          </h3>
+                          <div className="grid grid-cols-2 gap-2">
+                            {["石陣林地", "樂鳴森林", "樹葉小徑", "蟲巢森林", "火紅小徑", "入天叢林", "角鬥草原"].map((name, i) => (
+                              <button 
+                                key={i} 
+                                onClick={() => handleLocationClick(name)}
+                                className="bg-white px-3 py-2.5 rounded-lg shadow-sm border border-emerald-100 text-emerald-900 font-medium text-sm hover:-translate-y-0.5 hover:shadow hover:bg-emerald-50 transition text-center"
+                              >
+                                {name}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="bg-blue-50/50 p-6 rounded-2xl border border-blue-100">
+                          <h3 className="text-xl font-bold text-blue-800 mb-4 flex items-center gap-2 border-b border-blue-200 pb-2">
+                            <Icon name="waves" size={24} className="text-blue-500" /> 山道、河流與村落
+                          </h3>
+                          <div className="grid grid-cols-2 gap-2">
+                            {["輕盈河道", "龍門湖", "黑山走道"].map((name, i) => (
+                              <button 
+                                key={i} 
+                                onClick={() => handleLocationClick(name)}
+                                className="bg-white px-3 py-2.5 rounded-lg shadow-sm border border-blue-100 text-blue-900 font-medium text-sm hover:-translate-y-0.5 hover:shadow hover:bg-blue-50 transition text-center"
+                              >
+                                {name}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+                  )}
+                </div>
+              )}
+
+            </div>
+          </main>
+
+          <footer className="bg-gray-900 text-gray-400 py-12 border-t border-gray-800">
+             <div className="max-w-7xl mx-auto px-4 text-center">
+                <p>海根寶可夢伺服器 © {new Date().getFullYear()}</p>
+             </div>
+          </footer>
+
+          {isPokeballModalOpen && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn">
+              <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh] animate-slideInRight">
+                
+                <div className="bg-gradient-to-r from-red-500 to-red-600 p-6 flex justify-between items-center text-white shadow-md relative z-10">
+                   <h3 className="text-2xl font-bold flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full border-[2px] border-white bg-white relative overflow-hidden flex items-center justify-center">
+                         <div className="absolute top-0 w-full h-1/2 bg-red-500"></div>
+                         <div className="absolute w-full h-1 bg-gray-800"></div>
+                         <div className="absolute w-3 h-3 rounded-full border-2 border-gray-800 bg-white z-10"></div>
+                      </div>
+                      寶可夢球捕獲率圖鑑
+                   </h3>
+                   <button 
+                     onClick={() => setIsPokeballModalOpen(false)} 
+                     className="hover:bg-white/20 p-2 rounded-full transition focus:outline-none"
+                     title="關閉視窗"
+                   >
+                     <Icon name="x" size={28} />
+                   </button>
+                </div>
+
+                <div className="p-6 md:p-10 overflow-y-auto bg-gray-50 flex-1">
+                   <div className="grid md:grid-cols-2 gap-6">
+                      
+                      <div className="bg-white p-6 rounded-2xl border border-red-100 shadow-sm flex items-center gap-6 hover:shadow-md hover:-translate-y-1 transition duration-300">
+                         <div className="w-20 h-20 flex-shrink-0 rounded-full border-[3px] border-gray-800 relative overflow-hidden bg-white shadow-inner flex items-center justify-center">
+                            <div className="absolute top-0 w-full h-1/2 bg-red-500"></div>
+                            <div className="absolute w-full h-1.5 bg-gray-800 z-10"></div>
+                            <div className="absolute w-6 h-6 rounded-full border-[3px] border-gray-800 bg-white z-20 shadow-sm"></div>
+                         </div>
+                         <div>
+                            <div className="text-2xl font-bold text-gray-800 mb-1">寶貝球</div>
+                            <div className="text-sm text-gray-500 mb-3">最基礎、最常見的精靈球。</div>
+                            <span className="inline-block bg-red-100 text-red-700 px-3 py-1 rounded-lg font-black text-sm border border-red-200">
+                              捕獲率 1.0x
+                            </span>
+                         </div>
+                      </div>
+
+                      <div className="bg-white p-6 rounded-2xl border border-blue-100 shadow-sm flex items-center gap-6 hover:shadow-md hover:-translate-y-1 transition duration-300">
+                         <div className="w-20 h-20 flex-shrink-0 rounded-full border-[3px] border-gray-800 relative overflow-hidden bg-white shadow-inner flex items-center justify-center">
+                            <div className="absolute top-0 w-full h-1/2 bg-blue-500 flex justify-between px-2 pt-1.5">
+                                <div className="w-3 h-4 bg-red-500 transform -skew-x-12 rounded-sm border-b border-gray-800/30"></div>
+                                <div className="w-3 h-4 bg-red-500 transform skew-x-12 rounded-sm border-b border-gray-800/30"></div>
+                            </div>
+                            <div className="absolute w-full h-1.5 bg-gray-800 z-10"></div>
+                            <div className="absolute w-6 h-6 rounded-full border-[3px] border-gray-800 bg-white z-20 shadow-sm"></div>
+                         </div>
+                         <div>
+                            <div className="text-2xl font-bold text-gray-800 mb-1">超級球</div>
+                            <div className="text-sm text-gray-500 mb-3">性能比寶貝球稍好的精靈球。</div>
+                            <span className="inline-block bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-black text-sm border border-blue-200">
+                              捕獲率 1.5x
+                            </span>
+                         </div>
+                      </div>
+
+                      <div className="bg-white p-6 rounded-2xl border border-yellow-200 shadow-sm flex items-center gap-6 hover:shadow-md hover:-translate-y-1 transition duration-300">
+                         <div className="w-20 h-20 flex-shrink-0 rounded-full border-[3px] border-gray-800 relative overflow-hidden bg-white shadow-inner flex items-center justify-center">
+                            <div className="absolute top-0 w-full h-1/2 bg-gray-800"></div>
+                            <div className="absolute top-0 w-10 h-1/2 bg-yellow-400 left-1/2 transform -translate-x-1/2"></div>
+                            <div className="absolute top-1.5 w-6 h-1/2 bg-gray-800 left-1/2 transform -translate-x-1/2 rounded-t-full"></div>
+                            
+                            <div className="absolute w-full h-1.5 bg-gray-800 z-10"></div>
+                            <div className="absolute w-6 h-6 rounded-full border-[3px] border-gray-800 bg-white z-20 shadow-sm"></div>
+                         </div>
+                         <div>
+                            <div className="text-2xl font-bold text-gray-800 mb-1">高級球</div>
+                            <div className="text-sm text-gray-500 mb-3">擁有很高捕獲成功率的精靈球。</div>
+                            <span className="inline-block bg-yellow-100 text-yellow-700 px-3 py-1 rounded-lg font-black text-sm border border-yellow-300">
+                              捕獲率 2.0x
+                            </span>
+                         </div>
+                      </div>
+
+                      <div className="bg-purple-50 p-6 rounded-2xl border border-purple-200 shadow-md flex items-center gap-6 hover:shadow-lg hover:-translate-y-1 transition duration-300 relative overflow-hidden">
+                         <div className="absolute right-0 top-0 w-32 h-32 bg-purple-200 rounded-full blur-3xl opacity-50"></div>
+                         <div className="w-20 h-20 flex-shrink-0 rounded-full border-[3px] border-gray-800 relative overflow-hidden bg-white shadow-inner flex items-center justify-center">
+                            <div className="absolute top-0 w-full h-1/2 bg-purple-600 flex justify-between items-center px-[2px]">
+                                <div className="w-3.5 h-3.5 bg-pink-400 rounded-full border border-purple-800 mb-2 shadow-inner"></div>
+                                <div className="text-white font-black text-[15px] leading-none mb-3 drop-shadow-md tracking-tighter">M</div>
+                                <div className="w-3.5 h-3.5 bg-pink-400 rounded-full border border-purple-800 mb-2 shadow-inner"></div>
+                            </div>
+                            <div className="absolute w-full h-1.5 bg-gray-800 z-10"></div>
+                            <div className="absolute w-6 h-6 rounded-full border-[3px] border-gray-800 bg-white z-20 shadow-sm"></div>
+                         </div>
+                         <div className="relative z-10">
+                            <div className="text-2xl font-bold text-purple-900 mb-1 flex items-center gap-2">
+                              大師球 <Icon name="sparkles" size={16} className="text-purple-500" />
+                            </div>
+                            <div className="text-sm text-purple-700 mb-3">最頂級的精靈球，必定能捉到寶可夢。</div>
+                            <span className="inline-block bg-gradient-to-r from-purple-600 to-fuchsia-500 text-white px-4 py-1.5 rounded-lg font-black text-sm shadow-md">
+                              捕獲率 100%
+                            </span>
+                         </div>
+                      </div>
+
+                   </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {isPokedexModalOpen && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn">
+              <div className="bg-white rounded-3xl shadow-2xl w-full max-w-5xl overflow-hidden flex flex-col max-h-[90vh] animate-slideInRight">
+                
+                <div className="bg-gradient-to-r from-indigo-500 to-indigo-700 p-4 sm:p-6 flex justify-between items-center text-white shadow-md relative z-20">
+                   <div className="flex items-center gap-4 w-full max-w-lg">
+                     <h3 className="text-xl sm:text-2xl font-bold flex items-center gap-2 whitespace-nowrap">
+                        <Icon name="cat" size={28} /> 寶可夢圖鑑
+                     </h3>
+                     <div className="relative flex-1 hidden sm:block">
+                       <input 
+                         type="text" 
+                         placeholder="搜尋名稱、編號或稀有度..." 
+                         value={pokedexSearchTerm}
+                         onChange={(e) => setPokedexSearchTerm(e.target.value)}
+                         className="w-full pl-10 pr-4 py-2 rounded-full bg-white/20 border border-white/30 text-white placeholder-white/70 focus:outline-none focus:bg-white focus:text-gray-800 focus:placeholder-gray-400 transition"
+                       />
+                       <Icon name="search" size={18} className="absolute left-3 top-2.5 text-current opacity-70" />
+                     </div>
+                   </div>
+                   <button 
+                     onClick={() => setIsPokedexModalOpen(false)} 
+                     className="hover:bg-white/20 p-2 rounded-full transition focus:outline-none ml-2"
+                     title="關閉視窗"
+                   >
+                     <Icon name="x" size={28} />
+                   </button>
+                </div>
+
+                <div className="p-4 sm:hidden bg-indigo-50 border-b border-indigo-100 z-10">
+                   <div className="relative w-full">
+                     <input 
+                       type="text" 
+                       placeholder="搜尋名稱、編號或稀有度..." 
+                       value={pokedexSearchTerm}
+                       onChange={(e) => setPokedexSearchTerm(e.target.value)}
+                       className="w-full pl-10 pr-4 py-2 rounded-xl bg-white border border-gray-200 text-gray-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+                     />
+                     <Icon name="search" size={18} className="absolute left-3 top-2.5 text-gray-400" />
+                   </div>
+                </div>
+
+                <div className="flex overflow-x-auto gap-3 p-4 bg-indigo-50/50 border-b border-indigo-100 no-scrollbar z-10 shadow-sm">
+                  {generations.map(gen => (
+                    <button
+                      key={gen.id}
+                      onClick={() => setActiveGen(gen.id)}
+                      className={`whitespace-nowrap px-5 py-2.5 rounded-full font-bold transition-all flex items-center gap-2 ${
+                        activeGen === gen.id
+                          ? 'bg-indigo-600 text-white shadow-md transform scale-105'
+                          : 'bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-100 hover:-translate-y-0.5'
+                      }`}
+                    >
+                      <span>{gen.name}</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${activeGen === gen.id ? 'bg-white/20 text-white' : 'bg-indigo-100 text-indigo-500'}`}>
+                        {gen.region}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="overflow-y-auto bg-white flex-1 relative">
+                  {activeGen === 1 ? (
+                  <table className="w-full text-left border-collapse min-w-[600px]">
+                    <thead className="sticky top-0 bg-indigo-50 shadow-sm z-10">
+                      <tr className="text-indigo-900 font-bold border-b border-indigo-200">
+                        <th className="p-4 pl-6 text-center w-20">編號</th>
+                        <th className="p-4">寶可夢名稱</th>
+                        <th className="p-4">稀有度</th>
+                        <th className="p-4">出現率 (%)</th>
+                        <th className="p-4 pr-6">生成等級範圍</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {gen1PokemonData
+                        .filter(p => p.name.includes(pokedexSearchTerm) || String(p.id).includes(pokedexSearchTerm) || p.rarity.includes(pokedexSearchTerm))
+                        .map(poke => (
+                        <tr key={poke.id} className="hover:bg-indigo-50/40 transition">
+                          <td className="p-4 pl-6 text-center text-gray-400 font-mono font-medium">#{String(poke.id).padStart(3, '0')}</td>
+                          <td className="p-4 font-bold text-gray-800 flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-[10px] text-gray-400 border border-gray-200 shadow-inner">
+                              IMG
+                            </div>
+                            {poke.name}
+                          </td>
+                          <td className="p-4">
+                            <span className={`text-xs px-3 py-1 rounded-full font-bold border ${
+                              poke.rarity === '超稀有' ? 'bg-purple-100 text-purple-700 border-purple-200' :
+                              poke.rarity === '稀有' ? 'bg-rose-100 text-rose-700 border-rose-200' :
+                              poke.rarity === '普通' ? 'bg-blue-100 text-blue-700 border-blue-200' :
+                              'bg-emerald-100 text-emerald-700 border-emerald-200'
+                            }`}>
+                              {poke.rarity}
+                            </span>
+                          </td>
+                          <td className="p-4 font-mono text-gray-600 font-medium">{poke.rate}%</td>
+                          <td className="p-4 pr-6 text-gray-600">Lv. {poke.min} ~ Lv. {poke.max}</td>
+                        </tr>
+                      ))}
+                      {gen1PokemonData.filter(p => p.name.includes(pokedexSearchTerm) || String(p.id).includes(pokedexSearchTerm) || p.rarity.includes(pokedexSearchTerm)).length === 0 && (
+                        <tr>
+                          <td colSpan="5" className="text-center py-16 text-gray-500">
+                            <div className="flex flex-col items-center justify-center">
+                              <Icon name="search" size={48} className="mb-4 opacity-30 text-indigo-400" />
+                              找不到符合「<span className="font-bold text-indigo-600">{pokedexSearchTerm}</span>」的寶可夢 😢
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-gray-400 bg-gray-50/30 p-8">
+                      <Icon name="cat" size={72} className="mb-4 opacity-20 text-indigo-400" />
+                      <h3 className="text-2xl font-bold text-gray-500 mb-2">第 {activeGen} 世代圖鑑建置中</h3>
+                      <p className="text-gray-400 max-w-md text-center">
+                        此世代的寶可夢資料與出現率正在調查與整理中，敬請期待未來伺服器的更新！
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>

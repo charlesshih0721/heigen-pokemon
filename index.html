@@ -365,16 +365,16 @@
                 trades: [
                   { 
                     requires: [
-                      { name: "8個 PP草", img: "Pep-Up_Flower.png" }
+                      { name: "8個 PP草", img: "./Pep-Up_Flower.png" }
                     ],
-                    reward: { name: "4個 PP單項小補劑", img: "Ether.png" }
+                    reward: { name: "4個 PP單項小補劑", img: "./Ether.png" }
                   },
                   { 
                     requires: [
-                      { name: "4個 PP單項小補劑", img: "Ether.png" },
-                      { name: "1個 蘋果", img: "Apple_JE3_BE3.png" }
+                      { name: "4個 PP單項小補劑", img: "./Ether.png" },
+                      { name: "1個 蘋果", img: "./Apple_JE3_BE3.png" }
                     ],
-                    reward: { name: "1個 PP單項全補劑", img: "Max_Ether.png" }
+                    reward: { name: "1個 PP單項全補劑", img: "./Max_Ether.png" }
                   }
                 ]
               },
@@ -384,7 +384,43 @@
               { name: "黑科技科學家", role: "研究員", desc: "提供寶可夢個體值與努力值的查看與教學。" },
               { name: "寶可夢少年", role: "訓練家", desc: "隨時準備好進行新手對戰，是測試實力的好對手！" },
               { name: "礦工", role: "資源收集", desc: "傳授挖礦技巧，並可交換一些稀有的進化石碎片。" },
-              { name: "黑市商人", role: "神秘商人", desc: "行蹤神秘，偶爾會販售一些稀奇古怪的罕見道具。" }
+              { 
+                name: "黑市商人", 
+                role: "神秘商人", 
+                desc: "行蹤神秘，偶爾會販售一些稀奇古怪的罕見道具。",
+                trades: [
+                  { 
+                    requires: [
+                      { name: "10個 emerald coin", img: "emerald_coin.png" }
+                    ],
+                    reward: { name: "1瓶 夜視藥水", img: "Invicon_Potion_of_Night_Vision.png" }
+                  },
+                  { 
+                    requires: [
+                      { name: "60個 emerald coin", img: "emerald_coin.png" }
+                    ],
+                    reward: { name: "1瓶 迅捷藥水", img: "Invicon_Potion_of_Swiftness.png" }
+                  },
+                  { 
+                    requires: [
+                      { name: "60個 emerald coin", img: "emerald_coin.png" }
+                    ],
+                    reward: { name: "1瓶 跳躍藥水", img: "Invicon_Potion_of_Leaping.png" }
+                  },
+                  { 
+                    requires: [
+                      { name: "60個 emerald coin", img: "emerald_coin.png" }
+                    ],
+                    reward: { name: "1瓶 水下呼吸藥水", img: "Invicon_Potion_of_Water_Breathing.png" }
+                  },
+                  { 
+                    requires: [
+                      { name: "60個 emerald coin", img: "emerald_coin.png" }
+                    ],
+                    reward: { name: "1瓶 抗火藥水", img: "Invicon_Potion_of_Fire_Resistance.png" }
+                  }
+                ]
+              }
             ],
             pokemon: [], 
             berry: [] 
@@ -952,7 +988,7 @@
                                       <th className="p-4">寶可夢名稱</th>
                                       <th className="p-4">屬性</th>
                                       <th className="p-4">出沒時間</th>
-                                      <th className="p-4">稀有度</th>
+                                      <th className="p-4">稀度</th>
                                     </tr>
                                   </thead>
                                   <tbody>

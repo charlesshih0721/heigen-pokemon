@@ -300,8 +300,56 @@
           description: "所有新玩家踏入海根寶可夢世界的第一站。這裡環境安全，氣候宜人，村長與村民們非常熱情，會引導你學習基本的生存與寶可夢知識。",
           data: {
             npc: [
-              { name: "大林博士", role: "寶可夢博士", desc: "引導新手，發放初始寶可夢與圖鑑。" },
-              { name: "小林", role: "博士助手", desc: "協助博士進行研究，提供基礎教學與任務。" },
+              { 
+                name: "大林博士", 
+                role: "寶可夢博士", 
+                desc: "引導新手，發放初始寶可夢與圖鑑。",
+                trades: [
+                  { 
+                    requires: [{ name: "5個 海根幣", img: "emerald_coin.png" }],
+                    reward: { name: "1個 寶可夢圖鑑 (紅)", img: "Pokedex_(red).png" }
+                  },
+                  { 
+                    requires: [{ name: "5個 海根幣", img: "emerald_coin.png" }],
+                    reward: { name: "1個 寶可夢圖鑑 (綠)", img: "Pokedex_(green).png" }
+                  },
+                  { 
+                    requires: [{ name: "5個 海根幣", img: "emerald_coin.png" }],
+                    reward: { name: "1個 寶可夢圖鑑 (黃)", img: "Pokedex_(yellow).png" }
+                  },
+                  { 
+                    requires: [{ name: "5個 海根幣", img: "emerald_coin.png" }],
+                    reward: { name: "1個 寶可夢圖鑑 (藍)", img: "Pokedex_(blue).png" }
+                  },
+                  { 
+                    requires: [{ name: "5個 海根幣", img: "emerald_coin.png" }],
+                    reward: { name: "1個 寶可夢圖鑑 (粉)", img: "Pokedex_(pink).png" }
+                  },
+                  { 
+                    requires: [{ name: "5個 海根幣", img: "emerald_coin.png" }],
+                    reward: { name: "1個 寶可夢圖鑑 (黑)", img: "Pokedex_(black).png" }
+                  },
+                  { 
+                    requires: [{ name: "5個 海根幣", img: "emerald_coin.png" }],
+                    reward: { name: "1個 寶可夢圖鑑 (白)", img: "Pokedex_(white).png" }
+                  }
+                ]
+              },
+              { 
+                name: "小林", 
+                role: "博士助手", 
+                desc: "協助博士進行研究，提供基礎教學與任務。",
+                trades: [
+                  { 
+                    requires: [{ name: "20個 海根幣", img: "emerald_coin.png" }],
+                    reward: { name: "1個 TM Case", img: "" }
+                  },
+                  { 
+                    requires: [{ name: "20個 海根幣", img: "emerald_coin.png" }],
+                    reward: { name: "1個 TR Case", img: "" }
+                  }
+                ]
+              },
               { 
                 name: "敲伊小姐", 
                 role: "寶可夢護士", 
@@ -378,12 +426,173 @@
                   }
                 ]
               },
-              { name: "背包客", role: "旅行者", desc: "分享在曠野地帶探險的實用經驗與小知識。" },
-              { name: "鍛球工匠", role: "工匠", desc: "教導如何使用圓柑果實製作特殊的精靈球。" },
-              { name: "球匠學徒", role: "學徒", desc: "收購各種果實，並販售基礎的精靈球零件。" },
-              { name: "黑科技科學家", role: "研究員", desc: "提供寶可夢個體值與努力值的查看與教學。" },
-              { name: "寶可夢少年", role: "訓練家", desc: "隨時準備好進行新手對戰，是測試實力的好對手！" },
-              { name: "礦工", role: "資源收集", desc: "傳授挖礦技巧，並可交換一些稀有的進化石碎片。" },
+              { 
+                name: "背包客", 
+                role: "旅行者", 
+                desc: "分享在曠野地帶探險的實用經驗與小知識。",
+                trades: [
+                  { 
+                    requires: [
+                      { name: "16個 皮革", img: "" },
+                      { name: "10根 線", img: "" }
+                    ],
+                    reward: { name: "1個 背包", img: "" }
+                  },
+                  { 
+                    requires: [
+                      { name: "1個 海根幣", img: "emerald_coin.png" }
+                    ],
+                    reward: { name: "3個 麵包", img: "" }
+                  }
+                ]
+              },
+              { 
+                name: "鍛球工匠", 
+                role: "工匠", 
+                desc: "教導如何使用圓柑果實製作特殊的精靈球。",
+                trades: [
+                  { 
+                    requires: [
+                      { name: "3個 鐵錠", img: "" },
+                      { name: "4個 紅石粉", img: "" }
+                    ],
+                    reward: { name: "3個 精靈球", img: "" }
+                  },
+                  { 
+                    requires: [
+                      { name: "4個 精靈球", img: "" },
+                      { name: "32個 銅錠", img: "" }
+                    ],
+                    reward: { name: "4個 超級球", img: "" }
+                  },
+                  { 
+                    requires: [
+                      { name: "4個 超級球", img: "" },
+                      { name: "16個 獄髓錠", img: "" }
+                    ],
+                    reward: { name: "4個 高級球", img: "" }
+                  },
+                  { 
+                    requires: [
+                      { name: "1個 高級球", img: "" },
+                      { name: "1個 地獄之星", img: "" }
+                    ],
+                    reward: { name: "1個 大師球", img: "" }
+                  }
+                ]
+              },
+              { 
+                name: "球匠學徒", 
+                role: "學徒", 
+                desc: "收購各種果實，並販售基礎的精靈球零件。",
+                trades: [
+                  { 
+                    requires: [
+                      { name: "9個 鐵原礦", img: "" },
+                      { name: "1個 煤炭", img: "" }
+                    ],
+                    reward: { name: "9個 鐵錠", img: "" }
+                  },
+                  { 
+                    requires: [
+                      { name: "9個 銅原礦", img: "" },
+                      { name: "1個 煤炭", img: "" }
+                    ],
+                    reward: { name: "9個 銅錠", img: "" }
+                  },
+                  { 
+                    requires: [
+                      { name: "9個 金原礦", img: "" },
+                      { name: "1個 煤炭", img: "" }
+                    ],
+                    reward: { name: "9個 金錠", img: "" }
+                  }
+                ]
+              },
+              { 
+                name: "黑科技科學家", 
+                role: "研究員", 
+                desc: "提供寶可夢個體值與努力值的查看與教學。",
+                trades: [
+                  { 
+                    requires: [
+                      { name: "8個 墨囊", img: "" },
+                      { name: "1根 羽毛", img: "" }
+                    ],
+                    reward: { name: "1個 書和羽毛筆", img: "" }
+                  },
+                  { 
+                    requires: [
+                      { name: "6個 懸根", img: "" },
+                      { name: "6個 懸根", img: "" }
+                    ],
+                    reward: { name: "8張 紙", img: "" }
+                  },
+                  { 
+                    requires: [
+                      { name: "3張 紙", img: "" },
+                      { name: "1個 書和羽毛筆", img: "" }
+                    ],
+                    reward: { name: "8個 傳送卷軸", img: "" }
+                  },
+                  { 
+                    requires: [
+                      { name: "1個 海根幣", img: "emerald_coin.png" }
+                    ],
+                    reward: { name: "16個 紅石粉", img: "" }
+                  }
+                ]
+              },
+              { 
+                name: "寶可夢少年", 
+                role: "訓練家", 
+                desc: "隨時準備好進行新手對戰，是測試實力的好對手！",
+                trades: [
+                  { 
+                    requires: [{ name: "16顆 精靈球", img: "" }],
+                    reward: { name: "1個 扭蛋幣", img: "" }
+                  },
+                  { 
+                    requires: [{ name: "8顆 超級球", img: "" }],
+                    reward: { name: "1個 扭蛋幣", img: "" }
+                  },
+                  { 
+                    requires: [{ name: "1顆 高級球", img: "" }],
+                    reward: { name: "1個 扭蛋幣", img: "" }
+                  },
+                  { 
+                    requires: [{ name: "1顆 先機球", img: "" }],
+                    reward: { name: "1個 扭蛋幣", img: "" }
+                  },
+                  { 
+                    requires: [{ name: "1顆 大師球", img: "" }],
+                    reward: { name: "10個 扭蛋幣", img: "" }
+                  }
+                ]
+              },
+              { 
+                name: "礦工", 
+                role: "資源收集", 
+                desc: "傳授挖礦技巧，並可交換一些稀有的進化石碎片。",
+                trades: [
+                  { 
+                    requires: [{ name: "4個 海根幣", img: "emerald_coin.png" }],
+                    reward: { name: "1把 礦工稿", img: "" }
+                  },
+                  { 
+                    requires: [{ name: "4個 海根幣", img: "emerald_coin.png" }],
+                    reward: { name: "1把 磨損的礦工稿", img: "" }
+                  },
+                  { 
+                    requires: [{ name: "8個 海根幣", img: "emerald_coin.png" }],
+                    reward: { name: "1把 採晶稿", img: "" }
+                  },
+                  { 
+                    requires: [{ name: "4個 海根幣", img: "emerald_coin.png" }],
+                    reward: { name: "1把 挖掘鏟", img: "" }
+                  }
+                ]
+              },
               { 
                 name: "黑市商人", 
                 role: "神秘商人", 
@@ -391,31 +600,31 @@
                 trades: [
                   { 
                     requires: [
-                      { name: "10個 emerald coin", img: "emerald_coin.png" }
+                      { name: "10個 海根幣", img: "emerald_coin.png" }
                     ],
                     reward: { name: "1瓶 夜視藥水", img: "Invicon_Potion_of_Night_Vision.png" }
                   },
                   { 
                     requires: [
-                      { name: "60個 emerald coin", img: "emerald_coin.png" }
+                      { name: "60個 海根幣", img: "emerald_coin.png" }
                     ],
                     reward: { name: "1瓶 迅捷藥水", img: "Invicon_Potion_of_Swiftness.png" }
                   },
                   { 
                     requires: [
-                      { name: "60個 emerald coin", img: "emerald_coin.png" }
+                      { name: "60個 海根幣", img: "emerald_coin.png" }
                     ],
                     reward: { name: "1瓶 跳躍藥水", img: "Invicon_Potion_of_Leaping.png" }
                   },
                   { 
                     requires: [
-                      { name: "60個 emerald coin", img: "emerald_coin.png" }
+                      { name: "60個 海根幣", img: "emerald_coin.png" }
                     ],
                     reward: { name: "1瓶 水下呼吸藥水", img: "Invicon_Potion_of_Water_Breathing.png" }
                   },
                   { 
                     requires: [
-                      { name: "60個 emerald coin", img: "emerald_coin.png" }
+                      { name: "60個 海根幣", img: "emerald_coin.png" }
                     ],
                     reward: { name: "1瓶 抗火藥水", img: "Invicon_Potion_of_Fire_Resistance.png" }
                   }
@@ -988,7 +1197,7 @@
                                       <th className="p-4">寶可夢名稱</th>
                                       <th className="p-4">屬性</th>
                                       <th className="p-4">出沒時間</th>
-                                      <th className="p-4">稀度</th>
+                                      <th className="p-4">稀有度</th>
                                     </tr>
                                   </thead>
                                   <tbody>
@@ -1203,7 +1412,7 @@
                             <div className="absolute w-6 h-6 rounded-full border-[3px] border-gray-800 bg-white z-20 shadow-sm"></div>
                          </div>
                          <div>
-                            <div className="text-2xl font-bold text-gray-800 mb-1">寶貝球</div>
+                            <div className="text-2xl font-bold text-gray-800 mb-1">精靈球</div>
                             <div className="text-sm text-gray-500 mb-3">最基礎、最常見的精靈球。</div>
                             <span className="inline-block bg-red-100 text-red-700 px-3 py-1 rounded-lg font-black text-sm border border-red-200">
                               捕獲率 1.0x
@@ -1222,7 +1431,7 @@
                          </div>
                          <div>
                             <div className="text-2xl font-bold text-gray-800 mb-1">超級球</div>
-                            <div className="text-sm text-gray-500 mb-3">性能比寶貝球稍好的精靈球。</div>
+                            <div className="text-sm text-gray-500 mb-3">性能比精靈球稍好的精靈球。</div>
                             <span className="inline-block bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-black text-sm border border-blue-200">
                               捕獲率 1.5x
                             </span>

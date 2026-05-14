@@ -73,6 +73,9 @@
       const [isPokedexModalOpen, setIsPokedexModalOpen] = useState(false);
       const [pokedexSearchTerm, setPokedexSearchTerm] = useState("");
       const [activeGen, setActiveGen] = useState(1);
+      
+      // 用來記錄現在打開了哪位 NPC 的交易視窗
+      const [selectedNpcTrade, setSelectedNpcTrade] = useState(null);
 
       const serverIP = "7da83f03.tw.vproxy.cloud:20506";
 
@@ -300,7 +303,27 @@
               { name: "大林博士", role: "寶可夢博士", desc: "引導新手，發放初始寶可夢與圖鑑。" },
               { name: "小林", role: "博士助手", desc: "協助博士進行研究，提供基礎教學與任務。" },
               { name: "敲伊小姐", role: "寶可夢護士", desc: "負責治療與恢復你受傷的寶可夢。" },
-              { name: "敲尼小姐", role: "商店店員", desc: "販售各式精靈球、傷藥與基礎生存物資。" },
+              { 
+                name: "敲尼小姐", 
+                role: "商店店員", 
+                desc: "販售各式精靈球、傷藥與基礎生存物資。",
+                trades: [
+                  { 
+                    requires: [
+                      { name: "4個 復活草", img: "" },
+                      { name: "2個 萬能粉", img: "" }
+                    ],
+                    reward: { name: "1個 活力碎片", img: "" }
+                  },
+                  { 
+                    requires: [
+                      { name: "4個 活力碎片", img: "" },
+                      { name: "1個 蜂巢", img: "" }
+                    ],
+                    reward: { name: "1個 活力塊", img: "" }
+                  }
+                ]
+              },
               { name: "敲參小姐", role: "任務接待", desc: "提供新手日常任務與地區情報。" },
               { name: "背包客", role: "旅行者", desc: "分享在曠野地帶探險的實用經驗與小知識。" },
               { name: "鍛球工匠", role: "工匠", desc: "教導如何使用圓柑果實製作特殊的精靈球。" },
@@ -433,6 +456,7 @@
         setSelectedLocation(null);
         setIsPokeballModalOpen(false); 
         setIsPokedexModalOpen(false);  
+        setSelectedNpcTrade(null); // 切換分頁時關閉交易視窗
       };
 
       return (
@@ -519,7 +543,7 @@
             )}
           </nav>
 
-          {/* Hero 區塊 (圖片背景) */}
+          {/* Hero 區塊 (保留自定義背景，無則顯示預設) */}
           <div 
             className="relative overflow-hidden pt-8 pb-36 sm:pt-12 sm:pb-48 bg-gray-900"
             style={{
@@ -834,7 +858,7 @@
                                     <div className="w-12 h-12 bg-indigo-200 rounded-full flex items-center justify-center flex-shrink-0 text-indigo-800 font-bold text-xl shadow-sm">
                                       {npc.name.charAt(0)}
                                     </div>
-                                    <div>
+                                    <div className="flex-1">
                                       <h4 className="font-bold text-gray-800 text-lg flex items-center gap-2 flex-wrap">
                                         {npc.name}
                                         <span className="text-xs font-bold text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded-md border border-indigo-200">
@@ -842,6 +866,16 @@
                                         </span>
                                       </h4>
                                       <p className="text-sm text-gray-600 mt-2">{npc.desc}</p>
+                                      
+                                      {/* NPC 兌換按鈕 */}
+                                      {npc.trades && (
+                                        <button
+                                          onClick={() => setSelectedNpcTrade(npc)}
+                                          className="mt-3 w-full bg-emerald-50 hover:bg-emerald-500 text-emerald-700 hover:text-white py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2 border border-emerald-200 transition-all duration-300 shadow-sm"
+                                        >
+                                          <Icon name="shopping-bag" size={16} /> 查看兌換列表
+                                        </button>
+                                      )}
                                     </div>
                                   </div>
                                 ))}
@@ -1047,6 +1081,7 @@
              </div>
           </footer>
 
+          {/* 寶可夢球種類圖鑑 (Modal) */}
           {isPokeballModalOpen && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn">
               <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh] animate-slideInRight">
@@ -1145,10 +1180,9 @@
                          </div>
                       </div>
 
+                      {/* 先機球 */}
                       <div className="bg-cyan-50 p-6 rounded-2xl border border-cyan-200 shadow-sm flex items-center gap-6 hover:shadow-md hover:-translate-y-1 transition duration-300">
-                         {/* CSS 繪製：先機球 */}
                          <div className="w-20 h-20 flex-shrink-0 rounded-full border-[3px] border-gray-800 relative overflow-hidden bg-white shadow-inner flex items-center justify-center">
-                            {/* 上半部：淺藍底色與黃色 X */}
                             <div className="absolute top-0 w-full h-1/2 bg-sky-400 flex items-center justify-center overflow-hidden">
                                <div className="absolute w-24 h-4 bg-yellow-400 transform rotate-45 shadow-sm"></div>
                                <div className="absolute w-24 h-4 bg-yellow-400 transform -rotate-45 shadow-sm"></div>
@@ -1171,6 +1205,7 @@
             </div>
           )}
 
+          {/* 全世代圖鑑 (Modal) */}
           {isPokedexModalOpen && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn">
               <div className="bg-white rounded-3xl shadow-2xl w-full max-w-5xl overflow-hidden flex flex-col max-h-[90vh] animate-slideInRight">
@@ -1295,6 +1330,72 @@
               </div>
             </div>
           )}
+
+          {/* NPC 交易彈出視窗 (支援真實圖片) */}
+          {selectedNpcTrade && (
+            <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn">
+              <div className="bg-gray-200 rounded-lg shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] border-4 border-gray-400 animate-slideInRight">
+                
+                {/* 標題列 (仿遊戲 UI) */}
+                <div className="bg-gray-300 p-3 flex justify-between items-center border-b-4 border-gray-400 relative z-10 shadow-sm">
+                   <h3 className="text-lg font-black text-gray-700 flex items-center gap-2 tracking-wide">
+                      <Icon name="store" size={20} className="text-gray-600" /> 
+                      {selectedNpcTrade.name} 的交易清單
+                   </h3>
+                   <button 
+                     onClick={() => setSelectedNpcTrade(null)} 
+                     className="bg-red-500 hover:bg-red-600 text-white p-1 rounded-sm border-b-2 border-red-700 transition focus:outline-none"
+                     title="關閉視窗"
+                   >
+                     <Icon name="x" size={20} />
+                   </button>
+                </div>
+
+                {/* 交易列表內容 */}
+                <div className="p-4 sm:p-6 overflow-y-auto space-y-3">
+                   {selectedNpcTrade.trades.map((trade, idx) => (
+                     <div key={idx} className="bg-gray-300 p-2 sm:p-3 rounded-md border-2 border-b-4 border-gray-400 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 hover:bg-gray-100 transition duration-200 shadow-inner">
+                        
+                        {/* 所需材料 (支援多個材料，每個都有專屬圖片) */}
+                        <div className="flex-1 flex flex-wrap gap-2">
+                           {trade.requires.map((req, rIdx) => (
+                             <div key={rIdx} className="flex-1 min-w-[140px] bg-white/60 p-2 rounded border border-gray-400 flex items-center gap-2">
+                               <div className="w-8 h-8 bg-gray-200 border border-gray-400 rounded-sm shadow-inner flex items-center justify-center text-gray-400 flex-shrink-0 overflow-hidden">
+                                 {req.img 
+                                   ? <img src={req.img} alt={req.name} className="w-full h-full object-contain p-1" /> 
+                                   : <Icon name="package" size={16} />
+                                 }
+                               </div>
+                               <span className="font-bold text-gray-800 text-sm sm:text-base">{req.name}</span>
+                             </div>
+                           ))}
+                        </div>
+                        
+                        {/* 箭頭 */}
+                        <div className="flex justify-center px-2">
+                           <Icon name="arrow-right" size={24} className="text-gray-500 hidden sm:block" />
+                           <Icon name="arrow-down" size={20} className="text-gray-500 sm:hidden" />
+                        </div>
+                        
+                        {/* 獲得物品 */}
+                        <div className="flex-1 min-w-[140px] bg-emerald-50 p-2 rounded border-2 border-emerald-400 flex items-center gap-2 shadow-sm relative overflow-hidden">
+                           <div className="absolute right-0 top-0 h-full w-12 bg-gradient-to-l from-emerald-200 to-transparent opacity-50"></div>
+                           <div className="w-8 h-8 bg-emerald-100 border border-emerald-300 rounded-sm shadow-inner flex items-center justify-center text-emerald-600 flex-shrink-0 relative z-10 overflow-hidden">
+                             {trade.reward.img 
+                               ? <img src={trade.reward.img} alt={trade.reward.name} className="w-full h-full object-contain p-1" /> 
+                               : <Icon name="star" size={16} />
+                             }
+                           </div>
+                           <span className="font-black text-emerald-800 text-sm sm:text-base relative z-10">{trade.reward.name}</span>
+                        </div>
+
+                     </div>
+                   ))}
+                </div>
+              </div>
+            </div>
+          )}
+
         </div>
       );
     }

@@ -302,7 +302,41 @@
             npc: [
               { name: "大林博士", role: "寶可夢博士", desc: "引導新手，發放初始寶可夢與圖鑑。" },
               { name: "小林", role: "博士助手", desc: "協助博士進行研究，提供基礎教學與任務。" },
-              { name: "敲伊小姐", role: "寶可夢護士", desc: "負責治療與恢復你受傷的寶可夢。" },
+              { 
+                name: "敲伊小姐", 
+                role: "寶可夢護士", 
+                desc: "負責治療與恢復你受傷的寶可夢。",
+                trades: [
+                  { 
+                    requires: [
+                      { name: "8個 療草", img: "" },
+                      { name: "3個 瓶子草", img: "" }
+                    ],
+                    reward: { name: "8個 傷藥", img: "" }
+                  },
+                  { 
+                    requires: [
+                      { name: "4個 傷藥", img: "" },
+                      { name: "2個 紅色蘑菇", img: "" }
+                    ],
+                    reward: { name: "4個 好傷藥", img: "" }
+                  },
+                  { 
+                    requires: [
+                      { name: "2個 好傷藥", img: "" },
+                      { name: "1個 蜂蜜瓶", img: "" }
+                    ],
+                    reward: { name: "2個 厲害傷藥", img: "" }
+                  },
+                  { 
+                    requires: [
+                      { name: "2個 厲害傷藥", img: "" },
+                      { name: "1個 龍之吐息", img: "" }
+                    ],
+                    reward: { name: "2個 全滿藥", img: "" }
+                  }
+                ]
+              },
               { 
                 name: "敲尼小姐", 
                 role: "商店店員", 
@@ -310,17 +344,17 @@
                 trades: [
                   { 
                     requires: [
-                      { name: "4個 復活草", img: "Revival_Herb.png" },
-                      { name: "2個 萬能粉", img: "Heal_Powder.png" }
+                      { name: "4個 復活草", img: "" },
+                      { name: "2個 萬能粉", img: "" }
                     ],
-                    reward: { name: "1個 活力碎片", img: "Revive.png" }
+                    reward: { name: "1個 活力碎片", img: "" }
                   },
                   { 
                     requires: [
-                      { name: "4個 活力碎片", img: "Revive.png" },
-                      { name: "1個 蜂巢", img: "Invicon_Honeycomb.png" }
+                      { name: "4個 活力碎片", img: "" },
+                      { name: "1個 蜂巢", img: "" }
                     ],
-                    reward: { name: "1個 活力塊", img: "Max_Revive.png" }
+                    reward: { name: "1個 活力塊", img: "" }
                   }
                 ]
               },

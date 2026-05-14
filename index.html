@@ -1145,6 +1145,26 @@
                          </div>
                       </div>
 
+                      <div className="bg-cyan-50 p-6 rounded-2xl border border-cyan-200 shadow-sm flex items-center gap-6 hover:shadow-md hover:-translate-y-1 transition duration-300">
+                         {/* CSS 繪製：先機球 */}
+                         <div className="w-20 h-20 flex-shrink-0 rounded-full border-[3px] border-gray-800 relative overflow-hidden bg-white shadow-inner flex items-center justify-center">
+                            {/* 上半部：淺藍底色與黃色 X */}
+                            <div className="absolute top-0 w-full h-1/2 bg-sky-400 flex items-center justify-center overflow-hidden">
+                               <div className="absolute w-24 h-4 bg-yellow-400 transform rotate-45 shadow-sm"></div>
+                               <div className="absolute w-24 h-4 bg-yellow-400 transform -rotate-45 shadow-sm"></div>
+                            </div>
+                            <div className="absolute w-full h-1.5 bg-gray-800 z-10"></div>
+                            <div className="absolute w-6 h-6 rounded-full border-[3px] border-gray-800 bg-white z-20 shadow-sm"></div>
+                         </div>
+                         <div>
+                            <div className="text-2xl font-bold text-gray-800 mb-1">先機球</div>
+                            <div className="text-sm text-gray-500 mb-3">如果戰鬥開始的第一回合使用，會非常容易捉到寶可夢。</div>
+                            <span className="inline-block bg-cyan-100 text-cyan-700 px-3 py-1 rounded-lg font-black text-sm border border-cyan-200">
+                              首回合捕獲率 5.0x
+                            </span>
+                         </div>
+                      </div>
+
                    </div>
                 </div>
               </div>

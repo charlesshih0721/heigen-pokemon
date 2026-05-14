@@ -309,31 +309,31 @@
                 trades: [
                   { 
                     requires: [
-                      { name: "8個 療草", img: "Medicinal_Leek.png" },
-                      { name: "3個 瓶子草", img: "Invicon_Pitcher_Plant.png" }
+                      { name: "8個 療草", img: "./Medicinal_Leek.png" },
+                      { name: "3個 瓶子草", img: "./Invicon_Pitcher_Plant.png" }
                     ],
-                    reward: { name: "8個 傷藥", img: "Potion.png" }
+                    reward: { name: "8個 傷藥", img: "./Potion.png" }
                   },
                   { 
                     requires: [
-                      { name: "4個 傷藥", img: "Potion.png" },
-                      { name: "2個 紅色蘑菇", img: "1689319018_868153.png" }
+                      { name: "4個 傷藥", img: "./Potion.png" },
+                      { name: "2個 紅色蘑菇", img: "./1689319018_868153.png" }
                     ],
-                    reward: { name: "4個 好傷藥", img: "Super_Potion.png" }
+                    reward: { name: "4個 好傷藥", img: "./Super_Potion.png" }
                   },
                   { 
                     requires: [
-                      { name: "2個 好傷藥", img: "Super_Potion.png" },
-                      { name: "1個 蜂蜜瓶", img: "Honey_Bottle_JE1_BE2.png" }
+                      { name: "2個 好傷藥", img: "./Super_Potion.png" },
+                      { name: "1個 蜂蜜瓶", img: "./Honey_Bottle_JE1_BE2.png" }
                     ],
-                    reward: { name: "2個 厲害傷藥", img: "Hyper_Potion.png" }
+                    reward: { name: "2個 厲害傷藥", img: "./Hyper_Potion.png" }
                   },
                   { 
                     requires: [
-                      { name: "2個 厲害傷藥", img: "Hyper_Potion.png" },
-                      { name: "1個 龍之吐息", img: "Invicon_Dragon's_Breath.png" }
+                      { name: "2個 厲害傷藥", img: "./Hyper_Potion.png" },
+                      { name: "1個 龍之吐息", img: "./Invicon_Dragon's_Breath.png" }
                     ],
-                    reward: { name: "2個 全滿藥", img: "Max_Potion.png" }
+                    reward: { name: "2個 全滿藥", img: "./Max_Potion.png" }
                   }
                 ]
               },
@@ -344,21 +344,40 @@
                 trades: [
                   { 
                     requires: [
-                      { name: "4個 復活草", img: "" },
-                      { name: "2個 萬能粉", img: "" }
+                      { name: "4個 復活草", img: "./Revival_Herb.png" },
+                      { name: "2個 萬能粉", img: "./Heal_Powder.png" }
                     ],
-                    reward: { name: "1個 活力碎片", img: "" }
+                    reward: { name: "1個 活力碎片", img: "./Revive.png" }
                   },
                   { 
                     requires: [
-                      { name: "4個 活力碎片", img: "" },
-                      { name: "1個 蜂巢", img: "" }
+                      { name: "4個 活力碎片", img: "./Revive.png" },
+                      { name: "1個 蜂巢", img: "./Invicon_Honeycomb.png" }
                     ],
-                    reward: { name: "1個 活力塊", img: "" }
+                    reward: { name: "1個 活力塊", img: "./Max_Revive.png" }
                   }
                 ]
               },
-              { name: "敲參小姐", role: "任務接待", desc: "提供新手日常任務與地區情報。" },
+              { 
+                name: "敲參小姐", 
+                role: "任務接待", 
+                desc: "提供新手日常任務與地區情報。",
+                trades: [
+                  { 
+                    requires: [
+                      { name: "8個 PP草", img: "Pep-Up_Flower.png" }
+                    ],
+                    reward: { name: "4個 PP單項小補劑", img: "Ether.png" }
+                  },
+                  { 
+                    requires: [
+                      { name: "4個 PP單項小補劑", img: "Ether.png" },
+                      { name: "1個 蘋果", img: "Apple_JE3_BE3.png" }
+                    ],
+                    reward: { name: "1個 PP單項全補劑", img: "Max_Ether.png" }
+                  }
+                ]
+              },
               { name: "背包客", role: "旅行者", desc: "分享在曠野地帶探險的實用經驗與小知識。" },
               { name: "鍛球工匠", role: "工匠", desc: "教導如何使用圓柑果實製作特殊的精靈球。" },
               { name: "球匠學徒", role: "學徒", desc: "收購各種果實，並販售基礎的精靈球零件。" },

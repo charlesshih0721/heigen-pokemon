@@ -75,18 +75,18 @@
     const { useState, useEffect, useRef } = React;
 
     // 自訂的 Icon 元件，用於載入 Lucide Icons
-    const Icon = ({ name, size = 24, className = "" }) => {
+    const Icon = ({ name, size = 24, className = "", strokeWidth = "2" }) => {
       return (
         <span
           className={`inline-flex items-center justify-center ${className}`}
           dangerouslySetInnerHTML={{
-            __html: `<i data-lucide="${name}" width="${size}" height="${size}" stroke-width="2" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></i>`
+            __html: `<i data-lucide="${name}" width="${size}" height="${size}" stroke-width="${strokeWidth}" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></i>`
           }}
         />
       );
     };
 
-    // 🌟 新增：互動式地圖元件
+    // 🌟 互動式地圖元件
     const GameMap = () => {
       const mapRef = useRef(null);
       const [showNames, setShowNames] = useState(true);
@@ -105,17 +105,16 @@
         });
         mapRef.current = map;
 
-        // 2. 設定您的地圖圖片大小
+        // 2. 設定您的地圖圖片大小 (請在這裡改回你的 4750 和 3800)
         const w = 4750;
         const h = 3800;
         const bounds = [[0, 0], [h, w]];
 
-        // 3. 載入您上傳的總地圖圖片 (檔名已經幫您設定好)
+        // 3. 載入您上傳的總地圖圖片 (請在這裡改回你的檔名)
         const mapImageUrl = "./my_island_map.png"; 
-        const fallbackUrl = "https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80";
-
+        
         L.imageOverlay(mapImageUrl, bounds, {
-           errorOverlayUrl: fallbackUrl
+           errorOverlayUrl: "https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80"
         }).addTo(map);
 
         // 讓視角自動適應圖片大小
@@ -163,7 +162,8 @@
       }, []);
 
       return (
-        <div className={`w-full h-full rounded-2xl relative overflow-hidden group ${!showNames ? 'hide-map-labels' : ''}`}>
+        // 🔧 修復核心：加上 absolute inset-0，強制地圖撐滿外層灰色的框框
+        <div className={`absolute inset-0 rounded-2xl overflow-hidden group ${!showNames ? 'hide-map-labels' : ''}`}>
           {/* Leaflet 地圖容器 */}
           <div id="interactive-map" className="w-full h-full z-10 relative cursor-crosshair"></div>
           
@@ -961,7 +961,7 @@
           <div 
             className="relative overflow-hidden pt-8 pb-36 sm:pt-12 sm:pb-48 bg-gray-900"
             style={{
-              backgroundImage: `url('./my-bg.png'), url('https://images.unsplash.com/photo-1607988795691-3d0147b43231?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')`,
+              backgroundImage: `url('./1000000873.png'), url('https://images.unsplash.com/photo-1607988795691-3d0147b43231?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat'
@@ -1059,7 +1059,7 @@
                 </div>
               )}
 
-              {/* --- 2. 地圖 Tab --- */}
+              {/* --- 2. 地圖 Tab (靜態圖片展示模式) --- */}
               {activeTab === 'map' && (
                 <div className="animate-fadeIn h-full flex flex-col">
                   <h2 className="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-3">
@@ -1069,9 +1069,13 @@
                     歡迎來到海根寶可夢的廣大世界！這裡記錄了目前已知的城鎮、荒野與神祕地標。準備好你的精靈球，隨時踏上未知的旅程吧！
                   </p>
                   
-                  {/* 🌟 載入互動式地圖元件 */}
-                  <div className="flex-grow bg-gray-200 rounded-2xl border-2 border-gray-300 relative overflow-hidden group min-h-[500px]">
-                     <GameMap />
+                  {/* 地圖圖片展示區塊 */}
+                  <div className="flex-grow bg-gray-100 rounded-2xl border-2 border-gray-200 relative overflow-hidden group min-h-[400px] sm:min-h-[500px]">
+                    
+                    {/* 這裡替換成你的地圖圖片！
+                      未來可以改成 src="./server-map.jpg" (你自己準備的地圖圖片) 
+                    */}
+                    <GameMap />
                   </div>
 
                   <div className="mt-6 bg-blue-50 border border-blue-100 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
@@ -1097,6 +1101,7 @@
                   
                   <div className="grid sm:grid-cols-2 gap-6">
                     
+                    {/* 寶可夢世代 (點擊開啟 Modal) */}
                     <div 
                       onClick={() => { setIsPokedexModalOpen(true); setActiveGen(1); }}
                       className="bg-white border border-gray-100 shadow-sm rounded-xl overflow-hidden hover:-translate-y-1 hover:shadow-lg transition duration-300 cursor-pointer group"
@@ -1115,6 +1120,7 @@
                       </div>
                     </div>
 
+                    {/* 藥劑系統 */}
                     <div className="bg-white border border-gray-100 shadow-sm rounded-xl overflow-hidden hover:-translate-y-1 hover:shadow-lg transition duration-300">
                       <div className="h-32 bg-gradient-to-br from-cyan-400 to-cyan-600 flex items-center justify-center text-white">
                         <Icon name="beaker" size={48} className="opacity-80 drop-shadow-md" />
@@ -1127,6 +1133,7 @@
                       </div>
                     </div>
 
+                    {/* 寶可夢球 (點擊開啟 Modal) */}
                     <div 
                       onClick={() => setIsPokeballModalOpen(true)}
                       className="bg-white border border-gray-100 shadow-sm rounded-xl overflow-hidden hover:-translate-y-1 hover:shadow-lg transition duration-300 cursor-pointer group"
@@ -1149,6 +1156,7 @@
                       </div>
                     </div>
 
+                    {/* 食材與料理 */}
                     <div className="bg-white border border-gray-100 shadow-sm rounded-xl overflow-hidden hover:-translate-y-1 hover:shadow-lg transition duration-300">
                       <div className="h-32 bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white">
                         <Icon name="utensils" size={48} className="opacity-80 drop-shadow-md" />
@@ -1177,15 +1185,19 @@
               {/* --- 4. 地區資訊 Tab --- */}
               {activeTab === 'region' && (
                 <div className="animate-fadeIn h-full">
+                  
+                  {/* === 子畫面：特定地區的詳細資訊 === */}
                   {selectedLocation ? (
                     <div className="animate-slideInRight h-full flex flex-col">
+                      
+                      {/* 頂部：返回與地區標題 */}
                       <div className="flex items-center gap-4 mb-6">
                         <button 
                           onClick={() => setSelectedLocation(null)}
                           className="p-3 bg-gray-100 hover:bg-emerald-100 hover:text-emerald-700 rounded-xl transition-colors text-gray-500 flex-shrink-0 flex items-center justify-center shadow-sm"
                           title="返回地區總覽"
                         >
-                          <Icon name="arrow-left" size={24} />
+                          <Icon name="arrow-left" size={24} className="stroke-[3px]" />
                         </button>
                         <div>
                           <div className="flex items-center gap-3">
@@ -1198,6 +1210,7 @@
                         </div>
                       </div>
 
+                      {/* 中間：三個並排大按鈕切換 */}
                       <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-8 bg-gray-50 p-2 rounded-2xl border border-gray-100">
                         <button
                           onClick={() => setActiveSubTab('npc')}
@@ -1242,7 +1255,10 @@
                         </button>
                       </div>
 
+                      {/* 底部：動態顯示對應的內容資料 */}
                       <div className="flex-1 bg-white border border-gray-100 shadow-inner rounded-2xl p-6 min-h-[300px]">
+                        
+                        {/* NPC 內容區 */}
                         {activeSubTab === 'npc' && (
                           <div className="animate-fadeIn">
                             {selectedLocation.data.npc.length > 0 ? (
@@ -1252,7 +1268,7 @@
                                     <div className="w-12 h-12 bg-indigo-200 rounded-full flex items-center justify-center flex-shrink-0 text-indigo-800 font-bold text-xl shadow-sm">
                                       {npc.name.charAt(0)}
                                     </div>
-                                    <div className="flex-1">
+                                    <div>
                                       <h4 className="font-bold text-gray-800 text-lg flex items-center gap-2 flex-wrap">
                                         {npc.name}
                                         <span className="text-xs font-bold text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded-md border border-indigo-200">
@@ -1260,16 +1276,6 @@
                                         </span>
                                       </h4>
                                       <p className="text-sm text-gray-600 mt-2">{npc.desc}</p>
-                                      
-                                      {/* NPC 兌換按鈕 */}
-                                      {npc.trades && (
-                                        <button
-                                          onClick={() => setSelectedNpcTrade(npc)}
-                                          className="mt-3 w-full bg-emerald-50 hover:bg-emerald-500 text-emerald-700 hover:text-white py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2 border border-emerald-200 transition-all duration-300 shadow-sm"
-                                        >
-                                          <Icon name="shopping-bag" size={16} /> 查看兌換列表
-                                        </button>
-                                      )}
                                     </div>
                                   </div>
                                 ))}
@@ -1283,6 +1289,7 @@
                           </div>
                         )}
 
+                        {/* 寶可夢內容區 */}
                         {activeSubTab === 'pokemon' && (
                           <div className="animate-fadeIn">
                             {selectedLocation.data.pokemon.length > 0 ? (
@@ -1326,6 +1333,7 @@
                           </div>
                         )}
 
+                        {/* 果樹內容區 */}
                         {activeSubTab === 'berry' && (
                           <div className="animate-fadeIn">
                             {selectedLocation.data.berry.length > 0 ? (
@@ -1357,6 +1365,8 @@
                       </div>
                     </div>
                   ) : (
+
+                  /* === 總覽畫面：地區列表 === */
                   <div className="animate-fadeIn">
                     <div className="mb-8 border-b border-gray-100 pb-6">
                       <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800 mb-3 flex items-center gap-3">
@@ -1368,6 +1378,7 @@
                     
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                       
+                      {/* 第一欄：建築與祭壇 */}
                       <div className="space-y-6">
                         <div className="bg-indigo-50/50 p-6 rounded-2xl border border-indigo-100 h-auto">
                           <h3 className="text-xl font-bold text-indigo-800 mb-4 flex items-center gap-2 border-b border-indigo-200 pb-2">
@@ -1407,6 +1418,7 @@
                         </div>
                       </div>
 
+                      {/* 第二欄：洞窟與峽谷 */}
                       <div className="bg-amber-50/50 p-6 rounded-2xl border border-amber-100">
                         <h3 className="text-xl font-bold text-amber-800 mb-4 flex items-center gap-2 border-b border-amber-200 pb-2">
                           <Icon name="mountain" size={24} className="text-amber-500" /> 洞窟與峽谷地形
@@ -1424,6 +1436,7 @@
                         </div>
                       </div>
 
+                      {/* 第三欄：森林、草原與水域 */}
                       <div className="space-y-6">
                         <div className="bg-emerald-50/50 p-6 rounded-2xl border border-emerald-100">
                           <h3 className="text-xl font-bold text-emerald-800 mb-4 flex items-center gap-2 border-b border-emerald-200 pb-2">
@@ -1469,19 +1482,24 @@
             </div>
           </main>
 
+          {/* 頁尾 */}
           <footer className="bg-gray-900 text-gray-400 py-12 border-t border-gray-800">
              <div className="max-w-7xl mx-auto px-4 text-center">
                 <p>海根寶可夢伺服器 © {new Date().getFullYear()}</p>
              </div>
           </footer>
 
-          {/* 寶可夢球種類圖鑑 (Modal) */}
+          {/* ========================================================= */}
+          {/* 彈出式額外介面：寶可夢球種類 (Modal)                           */}
+          {/* ========================================================= */}
           {isPokeballModalOpen && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn">
               <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh] animate-slideInRight">
                 
+                {/* Modal 標題列 */}
                 <div className="bg-gradient-to-r from-red-500 to-red-600 p-6 flex justify-between items-center text-white shadow-md relative z-10">
                    <h3 className="text-2xl font-bold flex items-center gap-3">
+                      {/* 小精靈球 Icon */}
                       <div className="w-8 h-8 rounded-full border-[2px] border-white bg-white relative overflow-hidden flex items-center justify-center">
                          <div className="absolute top-0 w-full h-1/2 bg-red-500"></div>
                          <div className="absolute w-full h-1 bg-gray-800"></div>
@@ -1498,17 +1516,20 @@
                    </button>
                 </div>
 
+                {/* Modal 內容區塊 */}
                 <div className="p-6 md:p-10 overflow-y-auto bg-gray-50 flex-1">
                    <div className="grid md:grid-cols-2 gap-6">
                       
+                      {/* 1. 寶貝球 */}
                       <div className="bg-white p-6 rounded-2xl border border-red-100 shadow-sm flex items-center gap-6 hover:shadow-md hover:-translate-y-1 transition duration-300">
+                         {/* CSS 繪製：寶貝球 */}
                          <div className="w-20 h-20 flex-shrink-0 rounded-full border-[3px] border-gray-800 relative overflow-hidden bg-white shadow-inner flex items-center justify-center">
                             <div className="absolute top-0 w-full h-1/2 bg-red-500"></div>
                             <div className="absolute w-full h-1.5 bg-gray-800 z-10"></div>
                             <div className="absolute w-6 h-6 rounded-full border-[3px] border-gray-800 bg-white z-20 shadow-sm"></div>
                          </div>
                          <div>
-                            <div className="text-2xl font-bold text-gray-800 mb-1">精靈球</div>
+                            <div className="text-2xl font-bold text-gray-800 mb-1">寶貝球</div>
                             <div className="text-sm text-gray-500 mb-3">最基礎、最常見的精靈球。</div>
                             <span className="inline-block bg-red-100 text-red-700 px-3 py-1 rounded-lg font-black text-sm border border-red-200">
                               捕獲率 1.0x
@@ -1516,7 +1537,9 @@
                          </div>
                       </div>
 
+                      {/* 2. 超級球 */}
                       <div className="bg-white p-6 rounded-2xl border border-blue-100 shadow-sm flex items-center gap-6 hover:shadow-md hover:-translate-y-1 transition duration-300">
+                         {/* CSS 繪製：超級球 */}
                          <div className="w-20 h-20 flex-shrink-0 rounded-full border-[3px] border-gray-800 relative overflow-hidden bg-white shadow-inner flex items-center justify-center">
                             <div className="absolute top-0 w-full h-1/2 bg-blue-500 flex justify-between px-2 pt-1.5">
                                 <div className="w-3 h-4 bg-red-500 transform -skew-x-12 rounded-sm border-b border-gray-800/30"></div>
@@ -1527,16 +1550,19 @@
                          </div>
                          <div>
                             <div className="text-2xl font-bold text-gray-800 mb-1">超級球</div>
-                            <div className="text-sm text-gray-500 mb-3">性能比精靈球稍好的精靈球。</div>
+                            <div className="text-sm text-gray-500 mb-3">性能比寶貝球稍好的精靈球。</div>
                             <span className="inline-block bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-black text-sm border border-blue-200">
                               捕獲率 1.5x
                             </span>
                          </div>
                       </div>
 
+                      {/* 3. 高級球 */}
                       <div className="bg-white p-6 rounded-2xl border border-yellow-200 shadow-sm flex items-center gap-6 hover:shadow-md hover:-translate-y-1 transition duration-300">
+                         {/* CSS 繪製：高級球 */}
                          <div className="w-20 h-20 flex-shrink-0 rounded-full border-[3px] border-gray-800 relative overflow-hidden bg-white shadow-inner flex items-center justify-center">
                             <div className="absolute top-0 w-full h-1/2 bg-gray-800"></div>
+                            {/* 黃色 H 字形狀 */}
                             <div className="absolute top-0 w-10 h-1/2 bg-yellow-400 left-1/2 transform -translate-x-1/2"></div>
                             <div className="absolute top-1.5 w-6 h-1/2 bg-gray-800 left-1/2 transform -translate-x-1/2 rounded-t-full"></div>
                             
@@ -1552,8 +1578,10 @@
                          </div>
                       </div>
 
+                      {/* 4. 大師球 */}
                       <div className="bg-purple-50 p-6 rounded-2xl border border-purple-200 shadow-md flex items-center gap-6 hover:shadow-lg hover:-translate-y-1 transition duration-300 relative overflow-hidden">
                          <div className="absolute right-0 top-0 w-32 h-32 bg-purple-200 rounded-full blur-3xl opacity-50"></div>
+                         {/* CSS 繪製：大師球 */}
                          <div className="w-20 h-20 flex-shrink-0 rounded-full border-[3px] border-gray-800 relative overflow-hidden bg-white shadow-inner flex items-center justify-center">
                             <div className="absolute top-0 w-full h-1/2 bg-purple-600 flex justify-between items-center px-[2px]">
                                 <div className="w-3.5 h-3.5 bg-pink-400 rounded-full border border-purple-800 mb-2 shadow-inner"></div>
@@ -1604,6 +1632,7 @@
             <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn">
               <div className="bg-white rounded-3xl shadow-2xl w-full max-w-5xl overflow-hidden flex flex-col max-h-[90vh] animate-slideInRight">
                 
+                {/* Modal 標題列與搜尋框 */}
                 <div className="bg-gradient-to-r from-indigo-500 to-indigo-700 p-4 sm:p-6 flex justify-between items-center text-white shadow-md relative z-20">
                    <div className="flex items-center gap-4 w-full max-w-lg">
                      <h3 className="text-xl sm:text-2xl font-bold flex items-center gap-2 whitespace-nowrap">
@@ -1629,6 +1658,7 @@
                    </button>
                 </div>
 
+                {/* 手機版搜尋列 */}
                 <div className="p-4 sm:hidden bg-indigo-50 border-b border-indigo-100 z-10">
                    <div className="relative w-full">
                      <input 
@@ -1642,6 +1672,7 @@
                    </div>
                 </div>
 
+                {/* 世代切換按鈕列 */}
                 <div className="flex overflow-x-auto gap-3 p-4 bg-indigo-50/50 border-b border-indigo-100 no-scrollbar z-10 shadow-sm">
                   {generations.map(gen => (
                     <button
@@ -1661,6 +1692,7 @@
                   ))}
                 </div>
 
+                {/* 寶可夢列表表格 */}
                 <div className="overflow-y-auto bg-white flex-1 relative">
                   {activeGen === 1 ? (
                   <table className="w-full text-left border-collapse min-w-[600px]">

@@ -44,10 +44,26 @@
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
-    /* 修正 Leaflet 預設背景色，讓它融入網頁 */
+    /* 修正 Leaflet 預設背景色，設定為深色以搭配您的島嶼地圖 */
     .leaflet-container {
-      background: #e5e7eb; /* Tailwind gray-200 */
+      background: #0f172a; 
       outline: none;
+    }
+    /* 控制島嶼名稱的顯示與隱藏動畫 */
+    .island-label {
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      background-color: rgba(17, 24, 39, 0.8) !important;
+      color: white !important;
+      border: 1px solid #374151 !important;
+      border-radius: 0.5rem !important;
+      padding: 0.25rem 0.75rem !important;
+      font-weight: bold !important;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+      margin-top: 5px !important;
+    }
+    .hide-map-labels .island-label {
+      opacity: 0 !important;
+      visibility: hidden !important;
     }
   </style>
 </head>
@@ -73,91 +89,71 @@
     // 🌟 新增：互動式地圖元件
     const GameMap = () => {
       const mapRef = useRef(null);
+      const [showNames, setShowNames] = useState(true);
 
       useEffect(() => {
         // 如果地圖已經初始化過，就不要重複執行
         if (mapRef.current !== null) return;
 
-        // 1. 建立地圖 (L.CRS.Simple 代表我們用的是平面圖片，不是真實地球)
+        // 1. 建立地圖 (L.CRS.Simple 代表我們用的是平面圖片)
         const map = L.map('interactive-map', {
           crs: L.CRS.Simple,
-          minZoom: -1.5, // 允許縮小的極限
-          maxZoom: 2,    // 允許放大的極限
+          minZoom: -2,   // 允許縮小
+          maxZoom: 2,    // 允許放大
           zoomControl: true,
           attributionControl: false // 隱藏右下角的版權文字
         });
         mapRef.current = map;
 
-        // 2. 設定你的地圖圖片大小 (請根據你未來的地圖圖片比例調整)
-        // 假設圖片解析度是 1920x1080
-        const w = 1920;
-        const h = 1080;
+        // 2. 設定您的地圖圖片大小
+        const w = 3000;
+        const h = 2000;
         const bounds = [[0, 0], [h, w]];
 
-        // 3. 放入你的地圖圖片
-        // 未來這裡可以換成你的專屬地圖檔案，例如 "./server-map.jpg"
-        const mapImageUrl = "https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80";
-        L.imageOverlay(mapImageUrl, bounds).addTo(map);
+        // 3. 載入您上傳的總地圖圖片 (檔名已經幫您設定好)
+        const mapImageUrl = "./image_ed24ff.png"; 
+        const fallbackUrl = "https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80";
+
+        L.imageOverlay(mapImageUrl, bounds, {
+           errorOverlayUrl: fallbackUrl
+        }).addTo(map);
 
         // 讓視角自動適應圖片大小
         map.fitBounds(bounds);
 
-        // --- 📍 自訂地標的圖示 (紅色水滴定位符號) ---
-        const customIcon = L.divIcon({
-          className: 'bg-transparent',
-          html: `<div class="w-10 h-10 bg-red-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-white transform -translate-y-1/2 hover:scale-110 transition-transform duration-200 cursor-pointer">
-                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                 </div>`,
-          iconSize: [40, 40],
-          iconAnchor: [20, 20],   // 錨點在中心底部
-          popupAnchor: [0, -20]   // 彈出視窗從上方出現
+        // 💡 開發者小工具：在地圖上點擊，會把 X 與 Y 座標顯示在開發人員工具 (F12) 的 Console 中
+        map.on('click', function(e) {
+          const y = Math.round(e.latlng.lat);
+          const x = Math.round(e.latlng.lng);
+          console.log(`📍 點擊位置座標 - x: ${x},  y: ${y}`);
         });
 
-        // --- 📍 地標資料清單 ---
-        // x 和 y 代表在地圖圖片上的座標 (範圍是 x: 0~1920, y: 0~1080)
+        // --- 📍 自訂地標的圖示 (紅色小圓點) ---
+        const customIcon = L.divIcon({
+          className: 'bg-transparent',
+          html: `<div class="w-4 h-4 bg-red-500 rounded-full border-2 border-white shadow-lg transform -translate-y-1/2 cursor-pointer hover:bg-red-400 transition-colors"></div>`,
+          iconSize: [16, 16],
+          iconAnchor: [8, 8]
+        });
+
+        // --- 📍 地標資料清單 (請透過點擊取得真實座標並更新這裡) ---
         const markersData = [
-          { 
-            name: "新守村", 
-            x: 500, 
-            y: 800, 
-            img: "./village.png", // 未來可換成真實圖片
-            desc: "新手誕生地，提供基礎物資與任務。" 
-          },
-          { 
-            name: "玩家大廳", 
-            x: 1000, 
-            y: 500, 
-            img: "./hall.png", 
-            desc: "最熱鬧的交誼廳，拍賣與活動中心。" 
-          },
-          { 
-            name: "龍門湖", 
-            x: 1500, 
-            y: 300, 
-            img: "./lake.png", 
-            desc: "神秘的湖泊，傳說有強大龍系寶可夢。" 
-          }
+          { name: "新守村", x: 1200, y: 1500 },
+          { name: "玩家大廳", x: 1000, y: 1800 },
+          { name: "龍門湖", x: 1100, y: 800 },
+          { name: "穿山峽谷", x: 600, y: 1400 },
+          { name: "冰結神殿", x: 2600, y: 1500 },
+          { name: "入天叢林", x: 1300, y: 500 }
         ];
 
-        // 把地標一個一個加上去
+        // 把地標一個一個加上去，使用永久顯示的 Tooltip 作為地名標籤
         markersData.forEach(loc => {
           const marker = L.marker([loc.y, loc.x], { icon: customIcon }).addTo(map);
-          
-          // 彈出視窗 (Popup) 裡面的 HTML 設計
-          const popupHtml = `
-            <div class="text-center p-1 w-48">
-              <h3 class="font-bold text-lg text-emerald-700 mb-2 border-b-2 border-emerald-100 pb-1">${loc.name}</h3>
-              
-              <div class="w-full h-28 bg-gray-100 mb-2 rounded-lg overflow-hidden flex items-center justify-center border border-gray-200 shadow-inner">
-                 <!-- 如果圖片載入失敗，會自動顯示文字 -->
-                 <img src="${loc.img}" alt="${loc.name}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
-                 <span style="display:none;" class="text-xs text-gray-400 font-bold">尚無預覽圖</span>
-              </div>
-              
-              <p class="text-xs text-gray-600 font-medium leading-relaxed">${loc.desc}</p>
-            </div>
-          `;
-          marker.bindPopup(popupHtml);
+          marker.bindTooltip(loc.name, {
+            permanent: true,
+            direction: 'bottom',
+            className: 'island-label' // 套用我們設定的 CSS 動畫樣式
+          }).openTooltip();
         });
 
         return () => {
@@ -166,7 +162,21 @@
         };
       }, []);
 
-      return <div id="interactive-map" className="w-full h-full rounded-2xl z-10 relative"></div>;
+      return (
+        <div className={`w-full h-full rounded-2xl relative overflow-hidden group ${!showNames ? 'hide-map-labels' : ''}`}>
+          {/* Leaflet 地圖容器 */}
+          <div id="interactive-map" className="w-full h-full z-10 relative cursor-crosshair"></div>
+          
+          {/* 右上角：開啟/關閉名稱的切換按鈕 */}
+          <button 
+            onClick={() => setShowNames(!showNames)}
+            className="absolute top-4 right-4 z-[1000] bg-gray-800/90 hover:bg-gray-700 text-white px-4 py-2.5 rounded-xl shadow-xl backdrop-blur-md flex items-center gap-2 border border-gray-600 transition-all font-bold opacity-80 hover:opacity-100"
+          >
+            <Icon name={showNames ? "eye-off" : "eye"} size={20} />
+            {showNames ? "隱藏島嶼名稱" : "顯示島嶼名稱"}
+          </button>
+        </div>
+      );
     };
 
     function App() {
@@ -859,11 +869,11 @@
         setSelectedLocation(null);
         setIsPokeballModalOpen(false); 
         setIsPokedexModalOpen(false);  
-        setSelectedNpcTrade(null); // 切換分頁時關閉交易視窗
       };
 
       return (
-        <div>
+        <div className="min-h-screen bg-gray-50 text-gray-800 font-sans">
+          
           {/* 導覽列 */}
           <nav className="bg-white shadow-md sticky top-0 z-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -946,11 +956,11 @@
             )}
           </nav>
 
-          {/* Hero 區塊 (保留自定義背景，無則顯示預設) */}
+          {/* Hero 區塊 (圖片背景) */}
           <div 
             className="relative overflow-hidden pt-8 pb-36 sm:pt-12 sm:pb-48 bg-gray-900"
             style={{
-              backgroundImage: `url('./my-bg.png'), url('https://images.unsplash.com/photo-1607988795691-3d0147b43231?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')`,
+              backgroundImage: `url('./1000000873.png'), url('https://images.unsplash.com/photo-1607988795691-3d0147b43231?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat'
@@ -1714,7 +1724,7 @@
             </div>
           )}
 
-          {/* NPC 交易彈出視窗 (支援真實圖片) */}
+          {/* NPC 交易彈出視窗 */}
           {selectedNpcTrade && (
             <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn">
               <div className="bg-gray-200 rounded-lg shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] border-4 border-gray-400 animate-slideInRight">

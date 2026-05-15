@@ -18,6 +18,10 @@
   <!-- 載入 Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
+  <!-- 🌟 新增：載入 Leaflet 地圖引擎的 CSS 與 JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
   <style>
     @keyframes fadeIn {
       from { opacity: 0; }
@@ -40,6 +44,11 @@
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
+    /* 修正 Leaflet 預設背景色，讓它融入網頁 */
+    .leaflet-container {
+      background: #e5e7eb; /* Tailwind gray-200 */
+      outline: none;
+    }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans">
@@ -47,7 +56,7 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect } = React;
+    const { useState, useEffect, useRef } = React;
 
     // 自訂的 Icon 元件，用於載入 Lucide Icons
     const Icon = ({ name, size = 24, className = "" }) => {
@@ -59,6 +68,105 @@
           }}
         />
       );
+    };
+
+    // 🌟 新增：互動式地圖元件
+    const GameMap = () => {
+      const mapRef = useRef(null);
+
+      useEffect(() => {
+        // 如果地圖已經初始化過，就不要重複執行
+        if (mapRef.current !== null) return;
+
+        // 1. 建立地圖 (L.CRS.Simple 代表我們用的是平面圖片，不是真實地球)
+        const map = L.map('interactive-map', {
+          crs: L.CRS.Simple,
+          minZoom: -1.5, // 允許縮小的極限
+          maxZoom: 2,    // 允許放大的極限
+          zoomControl: true,
+          attributionControl: false // 隱藏右下角的版權文字
+        });
+        mapRef.current = map;
+
+        // 2. 設定你的地圖圖片大小 (請根據你未來的地圖圖片比例調整)
+        // 假設圖片解析度是 1920x1080
+        const w = 1920;
+        const h = 1080;
+        const bounds = [[0, 0], [h, w]];
+
+        // 3. 放入你的地圖圖片
+        // 未來這裡可以換成你的專屬地圖檔案，例如 "./server-map.jpg"
+        const mapImageUrl = "https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80";
+        L.imageOverlay(mapImageUrl, bounds).addTo(map);
+
+        // 讓視角自動適應圖片大小
+        map.fitBounds(bounds);
+
+        // --- 📍 自訂地標的圖示 (紅色水滴定位符號) ---
+        const customIcon = L.divIcon({
+          className: 'bg-transparent',
+          html: `<div class="w-10 h-10 bg-red-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center text-white transform -translate-y-1/2 hover:scale-110 transition-transform duration-200 cursor-pointer">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                 </div>`,
+          iconSize: [40, 40],
+          iconAnchor: [20, 20],   // 錨點在中心底部
+          popupAnchor: [0, -20]   // 彈出視窗從上方出現
+        });
+
+        // --- 📍 地標資料清單 ---
+        // x 和 y 代表在地圖圖片上的座標 (範圍是 x: 0~1920, y: 0~1080)
+        const markersData = [
+          { 
+            name: "新守村", 
+            x: 500, 
+            y: 800, 
+            img: "./village.png", // 未來可換成真實圖片
+            desc: "新手誕生地，提供基礎物資與任務。" 
+          },
+          { 
+            name: "玩家大廳", 
+            x: 1000, 
+            y: 500, 
+            img: "./hall.png", 
+            desc: "最熱鬧的交誼廳，拍賣與活動中心。" 
+          },
+          { 
+            name: "龍門湖", 
+            x: 1500, 
+            y: 300, 
+            img: "./lake.png", 
+            desc: "神秘的湖泊，傳說有強大龍系寶可夢。" 
+          }
+        ];
+
+        // 把地標一個一個加上去
+        markersData.forEach(loc => {
+          const marker = L.marker([loc.y, loc.x], { icon: customIcon }).addTo(map);
+          
+          // 彈出視窗 (Popup) 裡面的 HTML 設計
+          const popupHtml = `
+            <div class="text-center p-1 w-48">
+              <h3 class="font-bold text-lg text-emerald-700 mb-2 border-b-2 border-emerald-100 pb-1">${loc.name}</h3>
+              
+              <div class="w-full h-28 bg-gray-100 mb-2 rounded-lg overflow-hidden flex items-center justify-center border border-gray-200 shadow-inner">
+                 <!-- 如果圖片載入失敗，會自動顯示文字 -->
+                 <img src="${loc.img}" alt="${loc.name}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+                 <span style="display:none;" class="text-xs text-gray-400 font-bold">尚無預覽圖</span>
+              </div>
+              
+              <p class="text-xs text-gray-600 font-medium leading-relaxed">${loc.desc}</p>
+            </div>
+          `;
+          marker.bindPopup(popupHtml);
+        });
+
+        return () => {
+          map.remove(); // 元件卸載時清除地圖
+          mapRef.current = null;
+        };
+      }, []);
+
+      return <div id="interactive-map" className="w-full h-full rounded-2xl z-10 relative"></div>;
     };
 
     function App() {
@@ -74,12 +182,10 @@
       const [pokedexSearchTerm, setPokedexSearchTerm] = useState("");
       const [activeGen, setActiveGen] = useState(1);
       
-      // 用來記錄現在打開了哪位 NPC 的交易視窗
       const [selectedNpcTrade, setSelectedNpcTrade] = useState(null);
 
       const serverIP = "7da83f03.tw.vproxy.cloud:20506";
 
-      // 每次畫面更新時，重新渲染 Icons
       useEffect(() => {
         lucide.createIcons();
       });
@@ -641,8 +747,7 @@
           description: "海根市的核心建築，是伺服器最熱鬧的交誼廳。設有各大系統的快捷入口與玩家交流區。",
           data: {
             npc: [
-              { name: "活動大使", role: "節慶活動", desc: "發布限時活動資訊與兌換活動專屬獎勵。" },
-              { name: "市集管理員", role: "交易系統", desc: "指導玩家如何租賃攤位或使用全球拍賣系統。" }
+              { name: "雲林彭于晏", role: "伺服器解說員", desc: "熱心為大家介紹伺服器的各項設施與基礎玩法。" }
             ],
             pokemon: [], 
             berry: [] 
@@ -953,29 +1058,9 @@
                     歡迎來到海根寶可夢的廣大世界！這裡記錄了目前已知的城鎮、荒野與神祕地標。準備好你的精靈球，隨時踏上未知的旅程吧！
                   </p>
                   
-                  <div className="flex-grow bg-gray-100 rounded-2xl border-2 border-gray-200 relative overflow-hidden group min-h-[400px] sm:min-h-[500px]">
-                    <img 
-                      src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80" 
-                      alt="伺服器地圖" 
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent opacity-80"></div>
-                    
-                    <div className="absolute bottom-0 left-0 w-full p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-                      <div className="text-white text-center sm:text-left">
-                        <h3 className="text-2xl font-bold mb-1 shadow-black drop-shadow-md">海根地區全貌</h3>
-                        <p className="text-gray-200 text-sm shadow-black drop-shadow-md">包含新守村、龍門湖與各大神殿位置</p>
-                      </div>
-                      
-                      <button className="bg-white/20 backdrop-blur-md border border-white/40 text-white px-6 py-2.5 rounded-full font-bold hover:bg-white hover:text-gray-900 transition-all shadow-lg flex items-center gap-2">
-                        <Icon name="search" size={18} />
-                        查看高畫質地圖
-                      </button>
-                    </div>
-
-                    <div className="absolute top-4 right-4 bg-emerald-500/90 backdrop-blur-sm text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-md flex items-center gap-1">
-                      <Icon name="info" size={14} /> 點擊可放大地圖
-                    </div>
+                  {/* 🌟 載入互動式地圖元件 */}
+                  <div className="flex-grow bg-gray-200 rounded-2xl border-2 border-gray-300 relative overflow-hidden group min-h-[500px]">
+                     <GameMap />
                   </div>
 
                   <div className="mt-6 bg-blue-50 border border-blue-100 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">

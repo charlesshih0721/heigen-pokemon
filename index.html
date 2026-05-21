@@ -18,7 +18,7 @@
   <!-- 載入 Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- 🌟 新增：載入 Leaflet 地圖引擎 of CSS 與 JS -->
+  <!-- 🌟 載入 Leaflet 地圖引擎 CSS 與 JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -44,7 +44,7 @@
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
-    /* 修正 Leaflet 預設背景色，設定為深色以搭配您的島嶼地圖 */
+    /* 修正 Leaflet 預設背景色 */
     .leaflet-container {
       background: #0f172a; 
       outline: none;
@@ -92,42 +92,36 @@
       const [showNames, setShowNames] = useState(true);
 
       useEffect(() => {
-        // 如果地圖已經初始化過，就不要重複執行
         if (mapRef.current !== null) return;
 
-        // 1. 建立地圖 (L.CRS.Simple 代表我們用的是平面圖片)
+        // 建立平面圖片地圖
         const map = L.map('interactive-map', {
           crs: L.CRS.Simple,
-          minZoom: -2,   // 允許縮小
-          maxZoom: 2,    // 允許放大
+          minZoom: -2,
+          maxZoom: 2,
           zoomControl: true,
-          attributionControl: false // 隱藏右下角的版權文字
+          attributionControl: false
         });
         mapRef.current = map;
 
-        // 2. 設定您的地圖圖片大小
         const w = 4750;
         const h = 3800;
         const bounds = [[0, 0], [h, w]];
-
-        // 3. 載入您上傳的總地圖圖片
         const mapImageUrl = "./my_island_map.png"; 
         
         L.imageOverlay(mapImageUrl, bounds, {
            errorOverlayUrl: "https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80"
         }).addTo(map);
 
-        // 讓視角自動適應圖片大小
         map.fitBounds(bounds);
 
-        // 💡 開發者小工具：在地圖上點擊，會把 X 與 Y 座標顯示在開發人員工具 (F12) 的 Console 中
+        // 📍 坐標收集工具
         map.on('click', function(e) {
           const y = Math.round(e.latlng.lat);
           const x = Math.round(e.latlng.lng);
           console.log(`📍 點擊位置座標 - x: ${x},  y: ${y}`);
         });
 
-        // --- 📍 自訂地標的圖示 (紅色小圓點) ---
         const customIcon = L.divIcon({
           className: 'bg-transparent',
           html: `<div class="w-4 h-4 bg-red-500 rounded-full border-2 border-white shadow-lg transform -translate-y-1/2 cursor-pointer hover:bg-red-400 transition-colors"></div>`,
@@ -135,7 +129,7 @@
           iconAnchor: [8, 8]
         });
 
-        // --- 📍 地標資料清單
+        // 📍 最新地標坐標清單
         const markersData = [
           { name: "玩家大廳", x: 1716, y: 3000 },
           { name: "新守村", x: 1724, y: 2644 },
@@ -160,29 +154,24 @@
           { name: "空懸峽谷", x: 1732, y: 856 }
         ];
 
-        // 把地標一個一個加上去，使用永久顯示的 Tooltip 作為地名標籤
         markersData.forEach(loc => {
           const marker = L.marker([loc.y, loc.x], { icon: customIcon }).addTo(map);
           marker.bindTooltip(loc.name, {
             permanent: true,
             direction: 'bottom',
-            className: 'island-label' // 套用我們設定的 CSS 動畫樣式
+            className: 'island-label'
           }).openTooltip();
         });
 
         return () => {
-          map.remove(); // 元件卸載時清除地圖
+          map.remove();
           mapRef.current = null;
         };
       }, []);
 
       return (
-        // 🔧 加上 absolute inset-0，強制地圖撐滿外層灰色的框框
         <div className={`absolute inset-0 rounded-2xl overflow-hidden group ${!showNames ? 'hide-map-labels' : ''}`}>
-          {/* Leaflet 地圖容器 */}
           <div id="interactive-map" className="w-full h-full z-10 relative cursor-crosshair"></div>
-          
-          {/* 右上角：開啟/關閉名稱 the 切換按鈕 */}
           <button 
             onClick={() => setShowNames(!showNames)}
             className="absolute top-4 right-4 z-[1000] bg-gray-800/90 hover:bg-gray-700 text-white px-4 py-2.5 rounded-xl shadow-xl backdrop-blur-md flex items-center gap-2 border border-gray-600 transition-all font-bold opacity-80 hover:opacity-100"
@@ -194,86 +183,87 @@
       );
     };
 
-    // --- 🍇 果樹與配件資料庫 (共計 70 種樹果) ---
+    // --- 🍇 果樹與配件資料庫 (共計 70 種樹果 - 已套用數字圖片與左右平齊文字) ---
     const berryDataList = [
-      { name: "橙橙果", img: "./oran_berry.png", tag: "HP恢復", tagClasses: "text-blue-500 bg-blue-50 border-blue-200", iconColor: "text-blue-300", desc: "橙橙果是一種天然樹果。作為攜帶物使用後，在戰鬥中持有該物品的寶可夢HP低於最大 HP 的二分之一時發動，恢復 10 HP。在戰鬥外也能直接對受傷的寶可夢右鍵使用，恢復 10 HP，是遊戲開始階段很好的血量恢復道具。", speed: "快速" },
-      { name: "櫻子果", img: "./cheri_berry.png", tag: "麻痺恢復", tagClasses: "text-amber-500 bg-amber-50 border-amber-200", iconColor: "text-amber-300", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢自動食用解除麻痺狀態，在戰鬥外也能直接對寶可夢右鍵使用解除麻痺狀態。", speed: "快速" },
-      { name: "零餘果", img: "./chesto_berry.png", tag: "睡眠恢復", tagClasses: "text-purple-500 bg-purple-50 border-purple-200", iconColor: "text-purple-300", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢自動食用解除睡眠狀態，在戰鬥外也能直接對寶可夢右鍵使用解除睡眠狀態。", speed: "快速" },
-      { name: "桃桃果", img: "./pecha_berry.png", tag: "中毒恢復", tagClasses: "text-pink-500 bg-pink-50 border-pink-200", iconColor: "text-pink-300", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢自動食用解除中毒狀態，在戰鬥外也能直接對寶可夢右鍵使用解除中毒狀態。", speed: "快速" },
-      { name: "莓莓果", img: "./rawst_berry.png", tag: "灼傷恢復", tagClasses: "text-teal-500 bg-teal-50 border-teal-200", iconColor: "text-teal-300", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢自動食用解除灼傷狀態，在戰鬥外也能直接對寶可夢右鍵使用解除灼傷狀態。", speed: "快速" },
-      { name: "利木果", img: "./leppa_berry.png", tag: "PP恢復", tagClasses: "text-red-500 bg-red-50 border-red-200", iconColor: "text-red-300", desc: "作為攜帶物使用後，在戰鬥中持有該物品 of 寶可夢招式 PP 降為 0 時自動食用恢復 10 點 PP。此為「利木果」的官方翻譯名稱。", speed: "快速" },
-      { name: "柿子果", img: "./persim_berry.png", tag: "混亂恢復", tagClasses: "text-orange-500 bg-orange-50 border-orange-200", iconColor: "text-orange-300", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢自動食用解除混亂狀態，在戰鬥外也能直接對寶可夢右鍵使用解除混亂狀態。", speed: "快速" },
-      { name: "蔓莓果", img: "./razz_berry.png", tag: "料理食材", tagClasses: "text-rose-500 bg-rose-50 border-rose-200", iconColor: "text-rose-300", desc: "外表呈紅色且帶有微辣味道的樹果。在基礎生存中非常適合作為製作寶可方塊或寶芬的高級食材。", speed: "中等" },
-      { name: "墨莓果", img: "./bluk_berry.png", tag: "料理食材", tagClasses: "text-indigo-500 bg-indigo-50 border-indigo-200", iconColor: "text-indigo-300", desc: "外表呈深藍色且帶有微酸味道的樹果。可用於料理系統，用來製作寶可方塊 or 寶芬的高級食材。", speed: "中等" },
-      { name: "焦香果", img: "./nanab_berry.png", tag: "料理食材", tagClasses: "text-pink-500 bg-pink-50 border-pink-200", iconColor: "text-pink-300", desc: "外表呈粉紅色且帶有微甜味道的彎曲樹果。在烹飪與料理時能提供獨特的甜味，是寶可方塊的主要材料之一。", speed: "中等" },
-      { name: "西梨果", img: "./wepear_berry.png", tag: "料理食材", tagClasses: "text-green-500 bg-green-50 border-green-200", iconColor: "text-green-300", desc: "外表呈綠色且帶有微苦味道的樹果。可用於料理系統，用來製作寶可方塊 or 寶芬的高級食材。", speed: "中等" },
-      { name: "鳳梨果", img: "./pinap_berry.png", tag: "料理食材", tagClasses: "text-yellow-500 bg-yellow-50 border-yellow-200", iconColor: "text-yellow-300", desc: "外表呈黃色且帶有微澀味道的樹果。在基礎生存中非常適合作為製作寶可方塊或寶芬的高級食材。", speed: "中等" },
-      { name: "巧可果", img: "./occa_berry.png", tag: "減弱火屬性", tagClasses: "text-red-500 bg-red-50 border-red-200", iconColor: "text-red-300", desc: "作為攜帶物使用後，當受到效果絕佳的「火屬性」招式攻擊時發動，能夠減弱１次該火屬性招式的威力。", speed: "緩慢" },
-      { name: "千香果", img: "./passho_berry.png", tag: "減弱水屬性", tagClasses: "text-blue-500 bg-blue-50 border-blue-200", iconColor: "text-blue-300", desc: "作為攜帶物使用後，當受到效果絕佳的「水屬性」招式攻擊時發動，能夠減弱１次該水屬性招式的威力。", speed: "緩慢" },
-      { name: "燭木果", img: "./wacan_berry.png", tag: "減弱電屬性", tagClasses: "text-yellow-500 bg-yellow-50 border-yellow-200", iconColor: "text-yellow-300", desc: "作為攜帶物使用後，當受到效果絕佳的「電屬性」招式攻擊時發動，能夠減弱１次該電屬性招式的威力。", speed: "緩慢" },
-      { name: "羅子果", img: "./rindo_berry.png", tag: "減弱草屬性", tagClasses: "text-green-500 bg-green-50 border-green-200", iconColor: "text-green-300", desc: "作為攜帶物使用後，當受到效果絕佳的「草屬性」招式攻擊時發動，能夠減弱１次該草屬性招式的威力。", speed: "緩慢" },
-      { name: "番荔果", img: "./yache_berry.png", tag: "減弱冰屬性", tagClasses: "text-cyan-500 bg-cyan-50 border-cyan-200", iconColor: "text-cyan-300", desc: "作為攜帶物使用後，當受到效果絕佳的「冰屬性」招式攻擊時發動，能夠減弱１次該冰屬性招式的威力。", speed: "緩慢" },
-      { name: "蓮蒲果", img: "./chople_berry.png", tag: "減弱格鬥屬性", tagClasses: "text-orange-500 bg-orange-50 border-orange-200", iconColor: "text-orange-400", desc: "作為攜帶物使用後，當受到效果絕佳的「格鬥屬性」招式攻擊時發動，能夠減弱１次該格鬥屬性招式的威力。", speed: "緩慢" },
-      { name: "通通果", img: "./kebia_berry.png", tag: "減弱毒屬性", tagClasses: "text-purple-500 bg-purple-50 border-purple-200", iconColor: "text-purple-400", desc: "作為攜帶物使用後，當受到效果絕佳的「毒屬性」招式攻擊時發動，能夠減弱１次該毒屬性招式的威力。", speed: "緩慢" },
-      { name: "腰木果", img: "./shuca_berry.png", tag: "減弱地面屬性", tagClasses: "text-yellow-600 bg-yellow-50 border-yellow-200", iconColor: "text-yellow-600", desc: "作為攜帶物使用後，當受到效果絕佳的「地面屬性」招式攻擊時發動，能夠減弱１次該地面屬性招式的威力。", speed: "緩慢" },
-      { name: "棱瓜果", img: "./coba_berry.png", tag: "減弱飛行屬性", tagClasses: "text-sky-500 bg-sky-50 border-sky-200", iconColor: "text-sky-400", desc: "作為攜帶物使用後，當受到效果絕佳的「飛行屬性」招式攻擊時發動，能夠減弱１次該飛行屬性招式的威力。", speed: "緩慢" },
-      { name: "福祿果", img: "./payapa_berry.png", tag: "減弱超能力屬性", tagClasses: "text-fuchsia-500 bg-fuchsia-50 border-fuchsia-200", iconColor: "text-fuchsia-400", desc: "作為攜帶物使用後，當受到效果絕佳的「超能力屬性」招式攻擊時發動，能夠減弱１次該超能力屬招式的威力。", speed: "緩慢" },
-      { name: "扁櫻果", img: "./tanga_berry.png", tag: "減弱蟲屬性", tagClasses: "text-lime-600 bg-lime-50 border-lime-200", iconColor: "text-lime-500", desc: "作為攜帶物使用後，當受到效果絕佳的「蟲屬性」招式攻擊時發動，能夠減弱１次該蟲屬性招式的威力。", speed: "緩慢" },
-      { name: "草蚕果", img: "./charti_berry.png", tag: "減弱岩石屬性", tagClasses: "text-stone-600 bg-stone-50 border-stone-200", iconColor: "text-stone-500", desc: "作為攜帶物使用後，當受到效果絕佳的「岩石屬性」招式攻擊時發動，能夠減弱１次該岩石屬性招式的威力。", speed: "緩慢" },
-      { name: "佛柑果", img: "./kasib_berry.png", tag: "減弱幽靈屬性", tagClasses: "text-violet-600 bg-violet-50 border-violet-200", iconColor: "text-violet-500", desc: "作為攜帶物使用後，當受到效果絕佳的「幽靈屬性']招式攻擊時發動，能夠減弱１次該幽靈屬性招式的威力。", speed: "緩慢" },
-      { name: "莓榴果", img: "./haban_berry.png", tag: "減弱龍屬性", tagClasses: "text-indigo-500 bg-indigo-50 border-indigo-200", iconColor: "text-indigo-400", desc: "作為攜帶物使用後，當受到效果絕佳的「龍屬性」招式攻擊時發動，能夠減弱１次該龍屬性招式的威力。", speed: "緩慢" },
-      { name: "刺耳果", img: "./colbur_berry.png", tag: "減弱惡屬性", tagClasses: "text-slate-700 bg-slate-100 border-slate-300", iconColor: "text-slate-500", desc: "作為攜帶物使用後，當受到效果絕佳的「惡屬性」招式攻擊時發動，能夠減弱１次該惡屬性招式的威力。", speed: "緩慢" },
-      { name: "霹靂果", img: "./babiri_berry.png", tag: "減弱鋼屬性", tagClasses: "text-gray-600 bg-gray-100 border-gray-300", iconColor: "text-gray-400", desc: "作為攜帶物使用後，當受到效果絕佳的「鋼屬性」招式攻擊時發動，能夠減弱１次該鋼屬性招式的威力。", speed: "緩慢" },
-      { name: "燈漿果", img: "./chilan_berry.png", tag: "減弱一般屬性", tagClasses: "text-stone-500 bg-stone-100 border-stone-200", iconColor: "text-stone-400", desc: "作為攜帶物使用後，當受到「一般屬性」招式攻擊時發動，能夠減弱１次該一般屬性招式的威力。", speed: "緩慢" },
-      { name: "落玫果", img: "./roseli_berry.png", tag: "減弱妖精屬性", tagClasses: "text-pink-500 bg-pink-50 border-pink-200", iconColor: "text-pink-400", desc: "作為攜帶物使用後，當受到效果絕佳的「妖精屬性」招式攻擊時發動，能夠減弱１次該妖精屬性招式的威力。", speed: "緩慢" },
-      { name: "蘋野果", img: "./leppa_berry.png", tag: "PP恢復", tagClasses: "text-red-500 bg-red-50 border-red-200", iconColor: "text-red-300", desc: "作為攜帶物使用後，在戰鬥中持有該物品 of 寶可夢招式 PP 降為 0 時自動食用恢復 10 點 PP。此為「利木果」的官方翻譯名稱。", speed: "快速" },
-      { name: "木子果", img: "./lum_berry.png", tag: "全異常恢復", tagClasses: "text-green-600 bg-green-50 border-green-200", iconColor: "text-green-400", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢自動食用解除所有異常狀態與混亂，在戰鬥外也能直接對寶可夢右鍵使用解除異常。", speed: "快速" },
-      { name: "勿花果", img: "./figy_berry.png", tag: "HP恢復/混亂", tagClasses: "text-red-600 bg-red-50 border-red-200", iconColor: "text-red-500", desc: "作為攜帶物使用後，HP低於最大HP的四分之一時發動，恢復最大HP的三分之一。若寶可夢討厭辣味，則會陷入混亂狀態。", speed: "中等" },
-      { name: "異奇果", img: "./wiki_berry.png", tag: "HP恢復/混亂", tagClasses: "text-purple-600 bg-purple-50 border-purple-200", iconColor: "text-purple-500", desc: "作為攜帶物使用後，HP低於最大HP的四分之一時發動，恢復最大HP的三分之一。若寶可夢討厭澀味，則會陷入混亂狀態。", speed: "中等" },
-      { name: "芒芒果", img: "./mago_berry.png", tag: "HP恢復/混亂", tagClasses: "text-pink-600 bg-pink-50 border-pink-200", iconColor: "text-pink-500", desc: "作為攜帶物使用後，HP低於最大HP的四分之一時發動，恢復最大HP的三分之一。若寶可夢討厭甜味，則會陷入混亂狀態。", speed: "中等" },
-      { name: "樂芭果", img: "./aguav_berry.png", tag: "HP恢復/混亂", tagClasses: "text-green-600 bg-green-50 border-green-200", iconColor: "text-green-500", desc: "作為攜帶物使用後，HP低於最大HP的四分之一時發動，恢復最大HP的三分之一。若寶可夢討厭苦味，則會陷入混亂狀態。", speed: "中等" },
-      { name: "芭亞果", img: "./iapapa_berry.png", tag: "HP恢復/混亂", tagClasses: "text-yellow-600 bg-yellow-50 border-yellow-200", iconColor: "text-yellow-500", desc: "作為攜帶物使用後，HP低於最大HP的四分之一時發動，恢復最大HP的三分之一。若寶可夢討厭酸味，則會陷入混亂狀態。", speed: "中等" },
-      { name: "文柚果", img: "./sitrus_berry.png", tag: "HP大幅恢復", tagClasses: "text-yellow-500 bg-yellow-50 border-yellow-200", iconColor: "text-yellow-400", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢HP低於最大 HP 的二分之一時發動，恢復最大HP的四分之一。非常實用的戰鬥恢復果實。", speed: "中等" },
-      { name: "辛子果", img: "./spelon_berry.png", tag: "料理食材", tagClasses: "text-red-700 bg-red-50 border-red-200", iconColor: "text-red-500", desc: "外表呈紅色且帶有極強辣味的樹果。可用於料理系統，非常適合作為製作寶可方塊或寶芬的高級食材。", speed: "緩慢" },
-      { name: "玉黍果", img: "./cornn_berry.png", tag: "料理食材", tagClasses: "text-yellow-600 bg-yellow-50 border-yellow-200", iconColor: "text-yellow-500", desc: "外表呈現如玉米般的黃色，帶有乾燥的口感。可用於料理系統，用來製作寶可方塊或寶芬的絕佳材料。", speed: "緩慢" },
-      { name: "岳竹果", img: "./magost_berry.png", tag: "料理食材", tagClasses: "text-pink-500 bg-pink-50 border-pink-200", iconColor: "text-pink-400", desc: "擁有甜美多汁口感的粉紅色樹果。可用於料理系統，非常適合作為製作寶可方塊或寶芬的優質食材。", speed: "緩慢" },
-      { name: "茸丹果", img: "./rabuta_berry.png", tag: "料理食材", tagClasses: "text-green-600 bg-green-50 border-green-200", iconColor: "text-green-500", desc: "帶有強烈苦味與澀味的綠色樹果。可用於料理系統，用來製作特殊口味寶可方塊或寶芬的材料。", speed: "緩慢" },
-      { name: "檬檸果", img: "./nomel_berry.png", tag: "料理食材", tagClasses: "text-yellow-400 bg-yellow-50 border-yellow-200", iconColor: "text-yellow-300", desc: "酸味極其強烈的黃色樹果。可用於料理系統，是非常適合作為製作酸味寶可方塊或寶芬的高級食材。", speed: "緩慢" },
-      { name: "謎芝果", img: "./enigma_berry.png", tag: "HP恢復", tagClasses: "text-indigo-600 bg-indigo-50 border-indigo-200", iconColor: "text-indigo-500", desc: "神秘的稀有樹果。作為攜帶物使用後，當受到效果絕佳的招式攻擊時發動，能夠恢復寶可夢最大 HP 的四分之一。", speed: "極慢" },
-      { name: "榴石果", img: "./pomeg_berry.png", tag: "降努力/升親密", tagClasses: "text-rose-600 bg-rose-50 border-rose-200", iconColor: "text-rose-500", desc: "對寶可夢使用後，能使其變得非常容易親近人（提升親密度），但會稍微降低 HP 的基礎點數（努力值）。", speed: "快速" },
-      { name: "藻根果", img: "./kelpsy_berry.png", tag: "降努力/升親密", tagClasses: "text-blue-600 bg-blue-50 border-blue-200", iconColor: "text-blue-500", desc: "對寶可夢使用後，能使其變得非常容易親近人（提升親密度），但會稍微降低攻擊的基礎點數（努力值）。", speed: "快速" },
-      { name: "比巴果", img: "./qualot_berry.png", tag: "降努力/升親密", tagClasses: "text-yellow-600 bg-yellow-50 border-yellow-200", iconColor: "text-yellow-500", desc: "對寶可夢使用後，能使其變得非常容易親近人（提升親密度），但會稍微降低防禦的基礎點數（努力值）。", speed: "快速" },
-      { name: "哈密果", img: "./hondew_berry.png", tag: "降努力/升親密", tagClasses: "text-green-600 bg-green-50 border-green-200", iconColor: "text-green-500", desc: "對寶可夢使用後，能使其變得非常容易親近人（提升親密度），但會稍微降低特攻的基礎點數（努力值）。", speed: "快速" },
-      { name: "葡萄果", img: "./grepa_berry.png", tag: "降努力/升親密", tagClasses: "text-yellow-500 bg-yellow-50 border-yellow-200", iconColor: "text-yellow-400", desc: "對寶可夢使用後，能使其變得非常容易親近人（提升親密度），但會稍微降低特防的基礎點數（努力值）。", speed: "快速" },
-      { name: "茄番果", img: "./tamato_berry.png", tag: "降努力/升親密", tagClasses: "text-red-600 bg-red-50 border-red-200", iconColor: "text-red-500", desc: "對寶可夢使用後，能使其變得非常容易親近人（提升親密度），但會稍微降低速度的基礎點數（努力值）。", speed: "快速" },
-      { name: "刺角果", img: "./pamtre_berry.png", tag: "料理食材", tagClasses: "text-orange-500 bg-orange-50 border-orange-200", iconColor: "text-orange-400", desc: "外表獨特的樹果。可用於料理系統，用來製作特殊口味寶可方塊或寶芬的高級食材。", speed: "緩慢" },
-      { name: "椰木果", img: "./watmel_berry.png", tag: "料理食材", tagClasses: "text-pink-500 bg-pink-50 border-pink-200", iconColor: "text-pink-400", desc: "外表獨特的樹果. 可用於料理系統，用來製作特殊口味寶可方塊或寶芬的高級食材。", speed: "緩慢" },
-      { name: "瓜西果", img: "./durin_berry.png", tag: "料理食材", tagClasses: "text-green-500 bg-green-50 border-green-200", iconColor: "text-green-400", desc: "外表獨特的樹果. 可用於料理系統，用來製作特殊口味寶可方塊或寶芬的高級食材。", speed: "緩慢" },
-      { name: "金枕果", img: "./belue_berry.png", tag: "料理食材", tagClasses: "text-purple-500 bg-purple-50 border-purple-200", iconColor: "text-purple-400", desc: "外表獨特的樹果。可用於料理系統，用來製作特殊口味寶可方塊或寶芬的高級食材。", speed: "緩慢" },
-      { name: "靛莓果", img: "./kee_berry.png", tag: "防禦提升", tagClasses: "text-yellow-600 bg-yellow-50 border-yellow-200", iconColor: "text-yellow-500", desc: "作為攜帶物使用後，當受到物理招式攻擊時發動，能夠提升寶可夢的防禦。", speed: "極慢" },
-      { name: "業開果", img: "./maranga_berry.png", tag: "特防提升", tagClasses: "text-blue-600 bg-blue-50 border-blue-200", iconColor: "text-blue-500", desc: "作為攜帶物使用後，當受到特殊招式攻擊時發動，能夠提升寶可夢的特防。", speed: "極慢" },
-      { name: "香羅果", img: "./xiangluo_berry.png", tag: "特殊果實", tagClasses: "text-emerald-600 bg-emerald-50 border-emerald-200", iconColor: "text-emerald-500", desc: "外表獨特的珍貴樹果。可用於料理系統，或是作為特定的養成道具使用。", speed: "極慢" },
-      { name: "花啤果", img: "./huapi_berry.png", tag: "特殊果實", tagClasses: "text-emerald-600 bg-emerald-50 border-emerald-200", iconColor: "text-emerald-500", desc: "外表獨特的珍貴樹果。可用於料理系統，或是作為特定的養成道具使用。", speed: "極慢" },
-      { name: "枝荔果", img: "./liechi_berry.png", tag: "攻擊提升", tagClasses: "text-red-600 bg-red-50 border-red-200", iconColor: "text-red-500", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢HP低於最大 HP 的四分之一時發動，提升攻擊。", speed: "極慢" },
-      { name: "龍睛果", img: "./ganlon_berry.png", tag: "防禦提升", tagClasses: "text-purple-600 bg-purple-50 border-purple-200", iconColor: "text-purple-500", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢HP低於最大 HP 的四分之一時發動，提升防禦。", speed: "極慢" },
-      { name: "沙鱗果", img: "./salac_berry.png", tag: "速度提升", tagClasses: "text-green-600 bg-green-50 border-green-200", iconColor: "text-green-500", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢HP低於最大 HP 的四分之一時發動，提升速度。", speed: "極慢" },
-      { name: "龍火果", img: "./petaya_berry.png", tag: "特攻提升", tagClasses: "text-pink-600 bg-pink-50 border-pink-200", iconColor: "text-pink-500", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢HP低於最大 HP 的四分之一時發動，提升特攻。", speed: "極慢" },
-      { name: "杏仔果", img: "./apicot_berry.png", tag: "特防提升", tagClasses: "text-blue-600 bg-blue-50 border-blue-200", iconColor: "text-blue-500", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢HP低於最大 HP 的四分之一時發動，提升特防。", speed: "極慢" },
-      { name: "蘭薩果", img: "./lansat_berry.png", tag: "要害率提升", tagClasses: "text-orange-600 bg-orange-50 border-orange-200", iconColor: "text-orange-500", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢HP低於最大 HP 的四分之一時發動，提升擊中要害率。", speed: "極慢" },
-      { name: "星桃果", img: "./starf_berry.png", tag: "隨機提升", tagClasses: "text-emerald-600 bg-emerald-50 border-emerald-200", iconColor: "text-emerald-500", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢HP低於最大 HP 的四分之一時發動，隨機大幅提升一項能力。", speed: "極慢" },
-      { name: "奇秘果", img: "./micle_berry.png", tag: "命中提升", tagClasses: "text-cyan-600 bg-cyan-50 border-cyan-200", iconColor: "text-cyan-500", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢HP低於最大 HP 的四分之一時發動，提升下一次招式的命中率。", speed: "極慢" },
-      { name: "釋陀果", img: "./custap_berry.png", tag: "先制提升", tagClasses: "text-red-700 bg-red-50 border-red-200", iconColor: "text-red-600", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢HP低於最大 HP 的四分之一時發動，能讓下一次招式必定先制。", speed: "極慢" },
-      { name: "嘉珍果", img: "./jaboca_berry.png", tag: "反彈物理", tagClasses: "text-yellow-700 bg-yellow-50 border-yellow-200", iconColor: "text-yellow-600", desc: "作為攜帶物使用後，當受到物理招式攻擊時發動，給予對手傷害。", speed: "極慢" },
-      { name: "霧蓮果", img: "./rowap_berry.png", tag: "反彈特殊", tagClasses: "text-blue-700 bg-blue-50 border-blue-200", iconColor: "text-blue-600", desc: "作為攜帶物使用後，當受到特殊招式攻擊時發動，給予對手傷害。", speed: "極慢" },
-      { name: "子茄果", img: "./ziqie_berry.png", tag: "特殊果實", tagClasses: "text-emerald-600 bg-emerald-50 border-emerald-200", iconColor: "text-emerald-500", desc: "外表獨特的珍貴樹果。可用於料理系統，或是作為特定的養成道具使用。", speed: "極慢" }
+      { name: "橙橙果", img: "./784273.png", tag: "HP恢復", tagClasses: "text-blue-500 bg-blue-50 border-blue-200", iconColor: "text-blue-300", desc: "為攜帶物使用後，在戰鬥中持有該物品的寶可夢HP低於最大HP 的二分之一時發動，恢復10 HP。在戰鬥外也能直接對受傷的寶可夢右鍵使用，恢復10 HP 同時增加寶可夢的飽食度。", speed: "快速" },
+      { name: "櫻子果", img: "./784274.png", tag: "麻痺恢復", tagClasses: "text-amber-500 bg-amber-50 border-amber-200", iconColor: "text-amber-300", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢自動食用解除麻痺狀態，在戰鬥外也能直接對寶可夢右鍵使用解除麻痺狀態。", speed: "快速" },
+      { name: "零餘果", img: "./784275.png", tag: "睡眠恢復", tagClasses: "text-purple-500 bg-purple-50 border-purple-200", iconColor: "text-purple-300", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢自動食用解除睡眠狀態，在戰鬥外也能直接對寶可夢右鍵使用解除睡眠狀態。", speed: "快速" },
+      { name: "桃桃果", img: "./784276.png", tag: "中毒恢復", tagClasses: "text-pink-500 bg-pink-50 border-pink-200", iconColor: "text-pink-300", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢自動食用解除中毒狀態，在戰鬥外也能直接對寶可夢右鍵使用解除中毒狀態。", speed: "快速" },
+      { name: "莓莓果", img: "./784277.png", tag: "灼傷恢復", tagClasses: "text-teal-500 bg-teal-50 border-teal-200", iconColor: "text-teal-300", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢自動食用解除灼傷狀態，在戰鬥外也能直接對寶可夢右鍵使用解除灼傷狀態。", speed: "快速" },
+      { name: "利木果", img: "./784278.png", tag: "PP恢復", tagClasses: "text-red-500 bg-red-50 border-red-200", iconColor: "text-red-300", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢招式 PP 降為 0 時自動食用恢復 10 點 PP，在戰鬥外也能直接對寶可夢右鍵使用恢復 PP。", speed: "快速" },
+      { name: "柿子果", img: "./784279.png", tag: "混亂恢復", tagClasses: "text-orange-500 bg-orange-50 border-orange-200", iconColor: "text-orange-300", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢自動食用解除混亂狀態，在戰鬥外也能直接對寶可夢右鍵使用解除混亂狀態。", speed: "快速" },
+      { name: "蔓莓果", img: "./784280.png", tag: "料理食材", tagClasses: "text-rose-500 bg-rose-50 border-rose-200", iconColor: "text-rose-300", desc: "外表呈紅色且帶有微辣味道的樹果。在基礎生存中非常適合作為製作寶可方塊或寶芬的高級食材。", speed: "中等" },
+      { name: "墨莓果", img: "./784281.png", tag: "料理食材", tagClasses: "text-indigo-500 bg-indigo-50 border-indigo-200", iconColor: "text-indigo-300", desc: "外表呈深藍色且帶有微酸味道的樹果。可用於料理系統，用來製作寶可方塊 or 寶芬的高級食材。", speed: "中等" },
+      { name: "焦香果", img: "./784282.png", tag: "料理食材", tagClasses: "text-pink-500 bg-pink-50 border-pink-200", iconColor: "text-pink-300", desc: "外表呈粉紅色且帶有微甜味道的彎曲樹果。在烹飪與料理時能提供獨特的甜味，是寶可方塊的主要材料之一。", speed: "中等" },
+      { name: "西梨果", img: "./784283.png", tag: "料理食材", tagClasses: "text-green-500 bg-green-50 border-green-200", iconColor: "text-green-300", desc: "外表呈綠色且帶有微苦味道的樹果。可用於料理系統，用來製作寶可方塊 or 寶芬的高級食材。", speed: "中等" },
+      { name: "鳳梨果", img: "./784284.png", tag: "料理食材", tagClasses: "text-yellow-500 bg-yellow-50 border-yellow-200", iconColor: "text-yellow-300", desc: "外表呈黃色且帶有微澀味道的樹果。在基礎生存中非常適合作為製作寶可方塊或寶芬的高級食材。", speed: "中等" },
+      { name: "巧可果", img: "./784285.png", tag: "減弱火屬性", tagClasses: "text-red-500 bg-red-50 border-red-200", iconColor: "text-red-300", desc: "作為攜帶物使用後，當受到效果絕佳的「火屬性」招式攻擊時發動，能夠減弱１次該火屬性招式的威力。", speed: "緩慢" },
+      { name: "千香果", img: "./784286.png", tag: "減弱水屬性", tagClasses: "text-blue-500 bg-blue-50 border-blue-200", iconColor: "text-blue-300", desc: "作為攜帶物使用後，當受到效果絕佳的「水屬性」招式攻擊時發動，能夠減弱１次該水屬性招式的威力。", speed: "緩慢" },
+      { name: "燭木果", img: "./784287.png", tag: "減弱電屬性", tagClasses: "text-yellow-500 bg-yellow-50 border-yellow-200", iconColor: "text-yellow-300", desc: "作為攜帶物使用後，當受到效果絕佳的「電屬性」招式攻擊時發動，能夠減弱１次該電屬性招式的威力。", speed: "緩慢" },
+      { name: "羅子果", img: "./784288.png", tag: "減弱草屬性", tagClasses: "text-green-500 bg-green-50 border-green-200", iconColor: "text-green-300", desc: "作為攜帶物使用後，當受到效果絕佳的「草屬性」招式攻擊時發動，能夠減弱１次該草屬性招式的威力。", speed: "緩慢" },
+      { name: "番荔果", img: "./784289.png", tag: "減弱冰屬性", tagClasses: "text-cyan-500 bg-cyan-50 border-cyan-200", iconColor: "text-cyan-300", desc: "作為攜帶物使用後，當受到效果絕佳的「冰屬性」招式攻擊時發動，能夠減弱１次該冰屬性招式的威力。", speed: "緩慢" },
+      { name: "蓮蒲果", img: "./784290.png", tag: "減弱格鬥屬性", tagClasses: "text-orange-500 bg-orange-50 border-orange-200", iconColor: "text-orange-400", desc: "作為攜帶物使用後，當受到效果絕佳的「格鬥屬性」招式攻擊時發動，能夠減弱１次該格鬥屬性招式的威力。", speed: "緩慢" },
+      { name: "通通果", img: "./784291.png", tag: "減弱毒屬性", tagClasses: "text-purple-500 bg-purple-50 border-purple-200", iconColor: "text-purple-400", desc: "作為攜帶物使用後，當受到效果絕佳的「毒屬性」招式攻擊時發動，能夠減弱１次該毒屬性招式的威力。", speed: "緩慢" },
+      { name: "腰木果", img: "./784292.png", tag: "減弱地面屬性", tagClasses: "text-yellow-600 bg-yellow-50 border-yellow-200", iconColor: "text-yellow-600", desc: "作為攜帶物使用後，當受到效果絕佳的「地面屬性」招式攻擊時發動，能夠減弱１次該地面屬性招式的威力。", speed: "緩慢" },
+      { name: "棱瓜果", img: "./784293.png", tag: "減弱飛行屬性", tagClasses: "text-sky-500 bg-sky-50 border-sky-200", iconColor: "text-sky-400", desc: "作為攜帶物使用後，當受到效果絕佳的「飛行屬性」招式攻擊時發動，能夠減弱１次該飛行屬性招式的威力。", speed: "緩慢" },
+      { name: "福祿果", img: "./784294.png", tag: "減弱超能力屬性", tagClasses: "text-fuchsia-500 bg-fuchsia-50 border-fuchsia-200", iconColor: "text-fuchsia-400", desc: "作為攜帶物使用後，當受到效果絕佳的「超能力屬性」招式攻擊時發動，能夠減弱１次該超能力屬招式的威力。", speed: "緩慢" },
+      { name: "扁櫻果", img: "./784295.png", tag: "減弱蟲屬性", tagClasses: "text-lime-600 bg-lime-50 border-lime-200", iconColor: "text-lime-500", desc: "作為攜帶物使用後，當受到效果絕佳的「蟲屬性」招式攻擊時發動，能夠減弱１次該蟲屬性招式的威力。", speed: "緩慢" },
+      { name: "草蚕果", img: "./784296.png", tag: "減弱岩石屬性", tagClasses: "text-stone-600 bg-stone-50 border-stone-200", iconColor: "text-stone-500", desc: "作為攜帶物使用後，當受到效果絕佳的「岩石屬性」招式攻擊時發動，能夠減弱１次該岩石屬性招式的威力。", speed: "緩慢" },
+      { name: "佛柑果", img: "./784297.png", tag: "減弱幽靈屬性", tagClasses: "text-violet-600 bg-violet-50 border-violet-200", iconColor: "text-violet-500", desc: "作為攜帶物使用後，當受到效果絕佳的「幽靈屬性」招式攻擊時發動，能夠減弱１次該幽靈屬性招式的威力。", speed: "緩慢" },
+      { name: "莓榴果", img: "./784298.png", tag: "減弱龍屬性", tagClasses: "text-indigo-500 bg-indigo-50 border-indigo-200", iconColor: "text-indigo-400", desc: "作為攜帶物使用後，當受到效果絕佳的「龍屬性」招式攻擊時發動，能夠減弱１次該龍屬性招式的威力。", speed: "緩慢" },
+      { name: "刺耳果", img: "./784299.png", tag: "減弱惡屬性", tagClasses: "text-slate-700 bg-slate-100 border-slate-300", iconColor: "text-slate-500", desc: "作為攜帶物使用後，當受到效果絕佳的「惡屬性」招式攻擊時發動，能夠減弱１次該惡屬性招式的威力。", speed: "緩慢" },
+      { name: "霹靂果", img: "./784300.png", tag: "減弱鋼屬性", tagClasses: "text-gray-600 bg-gray-100 border-gray-300", iconColor: "text-gray-400", desc: "作為攜帶物使用後，當受到效果絕佳的「鋼屬性」招式攻擊時發動，能夠減弱１次該鋼屬性招式的威力。", speed: "緩慢" },
+      { name: "燈漿果", img: "./784301.png", tag: "減弱一般屬性", tagClasses: "text-stone-500 bg-stone-100 border-stone-200", iconColor: "text-stone-400", desc: "作為攜帶物使用後，當受到「一般屬性」招式攻擊時發動，能夠減弱１次該一般屬性招式的威力。", speed: "緩慢" },
+      { name: "落玫果", img: "./784302.png", tag: "減弱妖精屬性", tagClasses: "text-pink-500 bg-pink-50 border-pink-200", iconColor: "text-pink-400", desc: "作為攜帶物使用後，當受到效果絕佳的「妖精屬性」招式攻擊時發動，能夠減弱１次該妖精屬性招式的威力。", speed: "緩慢" },
+      { name: "蘋野果", img: "./784303.png", tag: "PP恢復", tagClasses: "text-red-500 bg-red-50 border-red-200", iconColor: "text-red-300", desc: "作為攜帶物使用後，在戰鬥中持有該物品 of 寶可夢招式 PP 降為 0 時自動食用恢復 10 點 PP。此為「利木果」的官方翻譯名稱。", speed: "快速" },
+      { name: "木子果", img: "./784304.png", tag: "全異常恢復", tagClasses: "text-green-600 bg-green-50 border-green-200", iconColor: "text-green-400", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢自動食用解除所有異常狀態與混亂，在戰鬥外也能直接對寶可夢右鍵使用解除異常。", speed: "快速" },
+      { name: "勿花果", img: "./784305.png", tag: "HP恢復/混亂", tagClasses: "text-red-600 bg-red-50 border-red-200", iconColor: "text-red-500", desc: "作為攜帶物使用後，HP低於最大HP的四分之一時發動，恢復最大HP的三分之一。若寶可夢討厭辣味，則會陷入混亂狀態。", speed: "中等" },
+      { name: "異奇果", img: "./784306.png", tag: "HP恢復/混亂", tagClasses: "text-purple-600 bg-purple-50 border-purple-200", iconColor: "text-purple-500", desc: "作為攜帶物使用後，HP低於最大HP的四分之一時發動，恢復最大HP的三分之一。若寶可夢討厭澀味，則會陷入混亂狀態。", speed: "中等" },
+      { name: "芒芒果", img: "./784307.png", tag: "HP恢復/混亂", tagClasses: "text-pink-600 bg-pink-50 border-pink-200", iconColor: "text-pink-500", desc: "作為攜帶物使用後，HP低於最大HP的四分之一時發動，恢復最大HP的三分之一。若寶可夢討厭甜味，則會陷入混亂狀態。", speed: "中等" },
+      { name: "樂芭果", img: "./784308.png", tag: "HP恢復/混亂", tagClasses: "text-green-600 bg-green-50 border-green-200", iconColor: "text-green-500", desc: "作為攜帶物使用後，HP低於最大HP的四分之一時發動，恢復最大HP的三分之一。若寶可夢討厭苦味，則會陷入混亂狀態。", speed: "中等" },
+      { name: "芭亞果", img: "./784309.png", tag: "HP恢復/混亂", tagClasses: "text-yellow-600 bg-yellow-50 border-yellow-200", iconColor: "text-yellow-500", desc: "作為攜帶物使用後，HP低於最大HP的四分之一時發動，恢復最大HP的三分之一。若寶可夢討厭酸味，則會陷入混亂狀態。", speed: "中等" },
+      { name: "文柚果", img: "./784310.png", tag: "HP大幅恢復", tagClasses: "text-yellow-500 bg-yellow-50 border-yellow-200", iconColor: "text-yellow-400", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢HP低於最大 HP 的二分之一時發動，恢復最大HP的四分之一。非常實用的戰鬥恢復果實。", speed: "中等" },
+      { name: "辛子果", img: "./784311.png", tag: "料理食材", tagClasses: "text-red-700 bg-red-50 border-red-200", iconColor: "text-red-500", desc: "外表呈紅色且帶有極強辣味的樹果。可用於料理系統，非常適合作為製作寶可方塊或寶芬的高級食材。", speed: "緩慢" },
+      { name: "玉黍果", img: "./784312.png", tag: "料理食材", tagClasses: "text-yellow-600 bg-yellow-50 border-yellow-200", iconColor: "text-yellow-500", desc: "外表呈現如玉米般的黃色，帶有乾燥的口感。可用於料理系統，用來製作寶可方塊或寶芬的絕佳材料。", speed: "緩慢" },
+      { name: "岳竹果", img: "./784313.png", tag: "料理食材", tagClasses: "text-pink-500 bg-pink-50 border-pink-200", iconColor: "text-pink-400", desc: "擁有甜美多汁口感的粉紅色樹果。可用於料理系統，非常適合作為製作寶可方塊或寶芬的優質食材。", speed: "緩慢" },
+      { name: "茸丹果", img: "./784314.png", tag: "料理食材", tagClasses: "text-green-600 bg-green-50 border-green-200", iconColor: "text-green-500", desc: "帶有強烈苦味與澀味的綠色樹果。可用於料理系統，用來製作特殊口味寶可方塊或寶芬的材料。", speed: "緩慢" },
+      { name: "檬檸果", img: "./784315.png", tag: "料理食材", tagClasses: "text-yellow-400 bg-yellow-50 border-yellow-200", iconColor: "text-yellow-300", desc: "酸味極其強烈的黃色樹果。可用於料理系統，是非常適合作為製作酸味寶可方塊或寶芬的高級食材。", speed: "緩慢" },
+      { name: "謎芝果", img: "./784316.png", tag: "HP恢復", tagClasses: "text-indigo-600 bg-indigo-50 border-indigo-200", iconColor: "text-indigo-500", desc: "神秘的稀有樹果。作為攜帶物使用後，當受到效果絕佳的招式攻擊時發動，能夠恢復寶可夢最大 HP 的四分之一。", speed: "極慢" },
+      { name: "榴石果", img: "./784317.png", tag: "降努力/升親密", tagClasses: "text-rose-600 bg-rose-50 border-rose-200", iconColor: "text-rose-500", desc: "對寶可夢使用後，能使其變得非常容易親近人（提升親密度），但會稍微降低 HP 的基礎點數（努力值）。", speed: "快速" },
+      { name: "藻根果", img: "./784318.png", tag: "降努力/升親密", tagClasses: "text-blue-600 bg-blue-50 border-blue-200", iconColor: "text-blue-500", desc: "對寶可夢使用後，能使其變得非常容易親近人（提升親密度），但會稍微降低攻擊的基礎點數（努力值）。", speed: "快速" },
+      { name: "比巴果", img: "./784319.png", tag: "降努力/升親密", tagClasses: "text-yellow-600 bg-yellow-50 border-yellow-200", iconColor: "text-yellow-500", desc: "對寶可夢使用後，能使其變得非常容易親近人（提升親密度），但會稍微降低防禦的基礎點數（努力值）。", speed: "快速" },
+      { name: "哈密果", img: "./784320.png", tag: "降努力/升親密", tagClasses: "text-green-600 bg-green-50 border-green-200", iconColor: "text-green-500", desc: "對寶可夢使用後，能使其變得非常容易親近人（提升親密度），但會稍微降低特攻的基礎點數（努力值）。", speed: "快速" },
+      { name: "葡萄果", img: "./784321.png", tag: "降努力/升親密", tagClasses: "text-yellow-500 bg-yellow-50 border-yellow-200", iconColor: "text-yellow-400", desc: "對寶可夢使用後，能使其變得非常容易親近人（提升親密度），但會稍微降低特防的基礎點數（努力值）。", speed: "快速" },
+      { name: "茄番果", img: "./784322.png", tag: "降努力/升親密", tagClasses: "text-red-600 bg-red-50 border-red-200", iconColor: "text-red-500", desc: "對寶可夢使用後，能使其變得非常容易親近人（提升親密度），但會稍微降低速度的基礎點數（努力值）。", speed: "快速" },
+      { name: "刺角果", img: "./784323.png", tag: "料理食材", tagClasses: "text-orange-500 bg-orange-50 border-orange-200", iconColor: "text-orange-400", desc: "外表裝扮獨特的樹果。可用於料理系統，用來製作特殊口味寶可方塊或寶芬的高級食材。", speed: "緩慢" },
+      { name: "椰木果", img: "./784324.png", tag: "料理食材", tagClasses: "text-pink-500 bg-pink-50 border-pink-200", iconColor: "text-pink-400", desc: "外表獨特的樹果。可用於料理系統，用來製作特殊口味寶可方塊或寶芬的高級食材。", speed: "緩慢" },
+      { name: "瓜西果", img: "./784325.png", tag: "料理食材", tagClasses: "text-green-500 bg-green-50 border-green-200", iconColor: "text-green-400", desc: "外表獨特的樹果。可用於料理系統，用來製作特殊口味寶可方塊或寶芬的高級食材。", speed: "緩慢" },
+      { name: "金枕果", img: "./784326.png", tag: "料理食材", tagClasses: "text-purple-500 bg-purple-50 border-purple-200", iconColor: "text-purple-400", desc: "外表獨特的樹果。可用於料理系統，用來製作特殊口味寶可方塊或寶芬的高級食材。", speed: "緩慢" },
+      { name: "靛莓果", img: "./784327.png", tag: "防禦提升", tagClasses: "text-yellow-600 bg-yellow-50 border-yellow-200", iconColor: "text-yellow-500", desc: "作為攜帶物使用後，當受到物理招式攻擊時發動，能夠提升寶可夢的防禦。", speed: "極慢" },
+      { name: "業開果", img: "./784328.png", tag: "特防提升", tagClasses: "text-blue-600 bg-blue-50 border-blue-200", iconColor: "text-blue-500", desc: "作為攜帶物使用後，當受到特殊招式攻擊時發動，能夠提升寶可夢的特防。", speed: "極慢" },
+      { name: "香羅果", img: "./784329.png", tag: "特殊果實", tagClasses: "text-emerald-600 bg-emerald-50 border-emerald-200", iconColor: "text-emerald-500", desc: "外表獨特的珍貴樹果。可用於料理系統，或是作為特定的養成道具使用。", speed: "極慢" },
+      { name: "花啤果", img: "./784330.png", tag: "特殊果實", tagClasses: "text-emerald-600 bg-emerald-50 border-emerald-200", iconColor: "text-emerald-500", desc: "外表獨特的珍貴樹果。可用於料理系統，或是作為特定的養成道具使用。", speed: "極慢" },
+      { name: "枝荔果", img: "./784331.png", tag: "攻擊提升", tagClasses: "text-red-600 bg-red-50 border-red-200", iconColor: "text-red-500", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢HP低於最大 HP 的四分之一時發動，提升攻擊。", speed: "極慢" },
+      { name: "龍睛果", img: "./784332.png", tag: "防禦提升", tagClasses: "text-purple-600 bg-purple-50 border-purple-200", iconColor: "text-purple-500", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢HP低於最大 HP 的四分之一時發動，提升防禦。", speed: "極慢" },
+      { name: "沙鱗果", img: "./784333.png", tag: "速度提升", tagClasses: "text-green-600 bg-green-50 border-green-200", iconColor: "text-green-500", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢HP低於最大 HP 的四分之一時發動，提升速度。", speed: "極慢" },
+      { name: "龍火果", img: "./784334.png", tag: "特攻提升", tagClasses: "text-pink-600 bg-pink-50 border-pink-200", iconColor: "text-pink-500", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢HP低於最大 HP 的四分之一時發動，提升特攻。", speed: "極慢" },
+      { name: "杏仔果", img: "./784335.png", tag: "特防提升", tagClasses: "text-blue-600 bg-blue-50 border-blue-200", iconColor: "text-blue-500", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢HP低於最大 HP 的四分之一時發動，提升特防。", speed: "極慢" },
+      { name: "蘭薩果", img: "./784336.png", tag: "要害率提升", tagClasses: "text-orange-600 bg-orange-50 border-orange-200", iconColor: "text-orange-500", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢HP低於最大 HP 的四分之一時發動，提升擊中要害率。", speed: "極慢" },
+      { name: "星桃果", img: "./784337.png", tag: "隨機提升", tagClasses: "text-emerald-600 bg-emerald-50 border-emerald-200", iconColor: "text-emerald-500", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢HP低於最大 HP 的四分之一時發動，隨機大幅提升一項能力。", speed: "極慢" },
+      { name: "奇秘果", img: "./784338.png", tag: "命中提升", tagClasses: "text-cyan-600 bg-cyan-50 border-cyan-200", iconColor: "text-cyan-500", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢HP低於最大 HP 的四分之一時發動，提升下一次招式的命中率。", speed: "極慢" },
+      { name: "釋陀果", img: "./784339.png", tag: "先制提升", tagClasses: "text-red-700 bg-red-50 border-red-200", iconColor: "text-red-600", desc: "作為攜帶物使用後，在戰鬥中持有該物品的寶可夢HP低於最大 HP 的四分之一時發動，能讓下一次招式必定先制。", speed: "極慢" },
+      { name: "嘉珍果", img: "./784340.png", tag: "反彈物理", tagClasses: "text-yellow-700 bg-yellow-50 border-yellow-200", iconColor: "text-yellow-600", desc: "作為攜帶物使用後，當受到物理招式攻擊時發動，給予對手傷害。", speed: "極慢" },
+      { name: "霧蓮果", img: "./784341.png", tag: "反彈特殊", tagClasses: "text-blue-700 bg-blue-50 border-blue-200", iconColor: "text-blue-600", desc: "作為攜帶物使用後，當受到特殊招式攻擊時發動，給予對手傷害。", speed: "極慢" },
+      { name: "子茄果", img: "./904806.png", tag: "特殊果實", tagClasses: "text-emerald-600 bg-emerald-50 border-emerald-200", iconColor: "text-emerald-500", desc: "外表獨特的珍貴樹果。可用於料理系統，或是作為特定的養成道具使用。", speed: "極慢" }
     ];
 
+    // --- 🛡️ 配件與道具資料庫 ---
     const accessoryDataList = [
       { name: "學習裝置", img: "./exp_share.png", tag: "經驗共享", tagClasses: "text-sky-500 bg-sky-50 border-sky-200", icon: "zap", iconColor: "text-sky-300", desc: "攜帶該道具的寶可夢即使沒有參與戰鬥，也能在戰鬥結束後獲得經驗值。是培育隊伍不可或缺的神器。" },
       { name: "不變之石", img: "./everstone.png", tag: "阻止進化", tagClasses: "text-gray-500 bg-gray-100 border-gray-300", icon: "octagon", iconColor: "text-gray-400", desc: "攜帶該道具的寶可夢將不會進化。若在繁殖時攜帶，子代會必定遺傳攜帶者的性格。" }
     ];
 
-    // 🌟 進化之石資料庫 (新增圖片欄位與圖片名稱設定)
+    // --- 💎 進化之石資料庫 (已更換為您提供的 10 種進化之石最新數字圖片路徑，且不做其他修改) ---
     const stoneDataList = [
       { name: "水之石 (Water Stone)", img: "./688313.png", tag: "水域/潮濕", tagClasses: "text-blue-600 bg-blue-50 border-blue-200", desc: "用於特定水屬性寶可夢進化。主要分布於「龍門湖」的水底岩石。", rarity: "普通" },
       { name: "火之石 (Fire Stone)", img: "./688232.png", tag: "火山/乾燥", tagClasses: "text-red-600 bg-red-50 border-red-200", desc: "用於特定火屬性寶可夢進化。主要出沒於「黑山走道」的岩柱。", rarity: "普通" },
@@ -283,8 +273,29 @@
       { name: "暗之石 (Dusk Stone)", img: "./688198.png", tag: "黑暗/深處", tagClasses: "text-purple-600 bg-purple-50 border-purple-200", desc: "如黑夜般漆黑的奇特石頭。目前無挖掘獲取方式。", rarity: "稀有" },
       { name: "覺醒之石 (Dawn Stone)", img: "./688207.png", tag: "晨曦/山頂", tagClasses: "text-cyan-600 bg-cyan-50 border-cyan-200", desc: "如晨光般閃耀。目前無挖掘獲取方式。", rarity: "稀有" },
       { name: "冰之石 (Ice Stone)", img: "./688283.png", tag: "極寒/冰雪", tagClasses: "text-sky-500 bg-sky-50 border-sky-200", desc: "帶有雪花般冰冷花紋。主要封印在「寒冰迷宮」的萬年冰川之中，以及「寒冰神殿」祭壇附近的雪原深處。", rarity: "普通" },
-      { name: "日之石 (Sun Stone)", img: "./688261.png", tag: "烈日/草原", tagClasses: "text-orange-600 bg-orange-50 border-orange-200", desc: "散發著太陽般溫慢。在烈日當空時，有機會在「穿山峽谷」開闊地的巨石壁中採掘。", rarity: "普通" },
+      { name: "日之石 (Sun Stone)", img: "./688261.png", tag: "烈日/草原", tagClasses: "text-orange-600 bg-orange-50 border-orange-200", desc: "散發著太陽般溫慢。在烈日當空時，有機會在「穿山峽谷」開塊地的巨石壁中採掘。", rarity: "普通" },
       { name: "月之石 (Moon Stone)", img: "./688293.png", tag: "月光/洞窟", tagClasses: "text-indigo-600 bg-indigo-50 border-indigo-200", desc: "映射著月色的神秘石塊。在滿月之夜，探索「堅岩洞窟深處」挖掘尋獲。", rarity: "普通" }
+    ];
+
+    // --- 🧪 寶可夢藥水資料庫 (共 17 種實用藥劑) ---
+    const potionDataList = [
+      { name: "傷藥", img: "./potion.png", tag: "HP恢復", tagClasses: "text-blue-500 bg-blue-50 border-blue-200", iconColor: "text-blue-300", desc: "最基礎的微調恢復噴霧，能讓受傷的寶可夢回復 20 點 HP。是新手訓練家在冒險初期最依賴的健康藥水。", effect: "回復 20 HP" },
+      { name: "好傷藥", img: "./super_potion.png", tag: "HP恢復", tagClasses: "text-blue-500 bg-blue-50 border-blue-200", iconColor: "text-blue-300", desc: "性能優良的加強版噴霧傷藥，能回復寶可夢 60 點 HP。適合進入森林與洞窟探險的中期訓練家。", effect: "回復 60 HP" },
+      { name: "厲害傷藥", img: "./hyper_potion.png", tag: "HP恢復", tagClasses: "text-blue-500 bg-blue-50 border-blue-200", iconColor: "text-blue-300", desc: "效果卓越的高能恢復噴霧，能讓寶可夢回復 120 點 HP。在激烈的道館挑戰與野外 Boss 戰中非常可靠。", effect: "回復 120 HP" },
+      { name: "全滿藥", img: "./max_potion.png", tag: "HP完全恢復", tagClasses: "text-cyan-500 bg-cyan-50 border-cyan-200", iconColor: "text-cyan-300", desc: "最高規格的恢復噴霧。無論寶可夢受了多重的傷，都能在瞬間完全恢復所有的 HP 狀態。", effect: "回復全部 HP" },
+      { name: "全藥", img: "./full_restore.png", tag: "全恢復", tagClasses: "text-indigo-600 bg-indigo-50 border-indigo-200", iconColor: "text-indigo-300", desc: "終極神聖的綠色調配液。不僅能完全回復寶可夢的所有 HP，還能同時解除中毒、麻痺、灼傷、冰凍與睡眠等所有異常狀態。", effect: "完全恢復 HP + 解除異常" },
+      { name: "萬能藥", img: "./full_heal.png", tag: "狀態消除", tagClasses: "text-purple-500 bg-purple-50 border-purple-200", iconColor: "text-purple-300", desc: "噴霧式的綜合治癒噴劑。能夠在一瞬間消除寶可夢身上所有的異常狀態（中毒、麻痺、灼傷、睡眠、冰凍及混亂狀態）。", effect: "解除所有異常狀態" },
+      { name: "解毒藥", img: "./antidote.png", tag: "狀態消除", tagClasses: "text-purple-500 bg-purple-50 border-purple-200", iconColor: "text-purple-300", desc: "具有針對性的微量解毒噴霧。可立即消除因踩到毒蘑菇，或受到毒屬性招式攻擊而產生的「中毒」異常狀態。", effect: "解除中毒狀態" },
+      { name: "解麻藥", img: "./paralyze_heal.png", tag: "狀態消除", tagClasses: "text-purple-500 bg-purple-50 border-purple-200", iconColor: "text-purple-300", desc: "專用舒緩噴霧。能活化寶可夢僵硬的肌肉，立刻治癒因受到電擊或麻痺粉而陷入的「麻痺」狀態。", effect: "解除麻痺狀態" },
+      { name: "燒傷藥", img: "./burn_heal.png", tag: "狀態消除", tagClasses: "text-purple-500 bg-purple-50 border-purple-200", iconColor: "text-purple-300", desc: "冰涼感極強的降溫噴霧。能瞬間融化並治癒因高溫招式而導致的「灼傷」狀態，防止寶可夢在戰鬥中持續失去體力。", effect: "解除灼傷狀態" },
+      { name: "解凍藥", img: "./ice_heal.png", tag: "狀態消除", tagClasses: "text-purple-500 bg-purple-50 border-purple-200", iconColor: "text-purple-300", desc: "溫和釋放熱能的噴霧。能迅速融化封鎖住寶可夢身體的冰霜，解除在雪山探險中容易陷入的「冰凍」狀態。", effect: "解除冰凍狀態" },
+      { name: "甦醒藥", img: "./awakening.png", tag: "狀態消除", tagClasses: "text-purple-500 bg-purple-50 border-purple-200", iconColor: "text-purple-300", desc: "具有清新提神氣味的微量吸入劑。能立刻刺激精神，喚醒因催眠招式、歌聲而陷入「睡眠」狀態的寶可夢。", effect: "解除睡眠狀態" },
+      { name: "活力碎片", img: "./revive.png", tag: "瀕死復活", tagClasses: "text-emerald-600 bg-emerald-50 border-emerald-200", iconColor: "text-emerald-300", desc: "金黃色閃耀著神聖微光的奇特結晶碎片。能溫和地凝聚生命能量，復活瀕死（無法戰鬥）的寶可夢並恢復一半的最大 HP。", effect: "瀕死復活 + 回復 50% HP" },
+      { name: "活力塊", img: "./max_revive.png", tag: "瀕死復活", tagClasses: "text-emerald-600 bg-emerald-50 border-emerald-200", iconColor: "text-emerald-300", desc: "一整顆散發著無限溫暖生命力的黃金星狀結晶。能直接復活瀕死的寶可夢，並完美回復所有的體力與狀態。", effect: "瀕死復活 + 回復全部 HP" },
+      { name: "能量粉", img: "./energy_powder.png", tag: "HP恢復/草藥", tagClasses: "text-emerald-500 bg-emerald-50 border-emerald-200", iconColor: "text-emerald-400", desc: "由天然植物烘乾磨碎而成的非常苦的草藥粉末。能為受傷寶可夢回復 50 HP，但因為太苦了會稍微降低親密度。", speed: "中藥", effect: "回復 50 HP (降低親密)" },
+      { name: "能量根", img: "./energy_root.png", tag: "HP恢復/草藥", tagClasses: "text-emerald-500 bg-emerald-50 border-emerald-200", iconColor: "text-emerald-400", desc: "味道極其苦澀的天然植物根莖，含有豐沛的療癒成分。能回復 200 HP，使用後會降低寶可夢的親密度。", speed: "中藥", effect: "回復 200 HP (降低親密)" },
+      { name: "萬能粉", img: "./heal_powder.png", tag: "狀態消除/草藥", tagClasses: "text-emerald-500 bg-emerald-50 border-emerald-200", iconColor: "text-emerald-400", desc: "苦澀至極的天然草藥粉。可以消除寶可夢身上的所有異常狀態，但因為味道太差，使用後會降低親密度。", speed: "中藥", effect: "解除異常 (降低親密)" },
+      { name: "復活草", img: "./revival_herb.png", tag: "瀕死復活/草藥", tagClasses: "text-emerald-500 bg-emerald-50 border-emerald-200", iconColor: "text-emerald-400", desc: "苦味直衝訓練家與寶可夢腦門的天然神聖草藥。能完美復活瀕死寶可夢並完全恢復 HP。由於極難吃，會大幅降低親密度。", speed: "中藥", effect: "瀕死復活 + 回復全部 HP (大幅降低親密)" }
     ];
 
     function App() {
@@ -300,11 +311,13 @@
       const [isBerryModalOpen, setIsBerryModalOpen] = useState(false);
       const [isAccessoryModalOpen, setIsAccessoryModalOpen] = useState(false);
       const [isStoneModalOpen, setIsStoneModalOpen] = useState(false); 
+      const [isPotionModalOpen, setIsPotionModalOpen] = useState(false); 
       
       const [pokedexSearchTerm, setPokedexSearchTerm] = useState("");
       const [berrySearchTerm, setBerrySearchTerm] = useState("");
       const [accessorySearchTerm, setAccessorySearchTerm] = useState("");
       const [stoneSearchTerm, setStoneSearchTerm] = useState(""); 
+      const [potionSearchTerm, setPotionSearchTerm] = useState(""); 
       const [activeGen, setActiveGen] = useState(1);
       
       const [selectedNpcTrade, setSelectedNpcTrade] = useState(null);
@@ -918,7 +931,7 @@
         "角鬥草原": {
           title: "角鬥草原",
           type: "森林與草原地形",
-          description: "廣闊無垠的草原，過去似乎是古代寶可夢戰鬥的競技場，至今仍遺留著許多古老的遺跡。",
+          description: "廣闊無淵的草原，過去世紀是古代寶可夢戰鬥的競技場，至今仍遺留著許多古老的遺跡。",
           data: {
             npc: [
               { name: "遺跡探索者", role: "考古學家", desc: "熱衷於研究草原上的古代遺跡，如果你找到了什麼奇怪的石板，可以拿給他看看。" }
@@ -957,7 +970,7 @@
           description: "小徑兩旁長滿了赤紅色的植物與落葉，宛如燃燒的火焰。這裡彌漫著一股神祕的氣息，傳說這條路連接著現世與未知的領域。",
           data: {
             npc: [
-              { name: "送神", role: "神秘引路人", desc: "一位靜靜佇立在小徑深處的神祕人物，似乎在主持某種古老的儀式，或許能為迷失的訓練家指引前往特殊祭壇的方向。" }
+              { name: "送神", role: "神秘引路人", desc: "一位靜靜佇立在小徑深處的神祕人物，似乎在主持某種古老的儀式，幕後或許能為迷失的訓練家指引前往特殊祭壇的方向。" }
             ],
             pokemon: [], 
             berry: [] 
@@ -972,7 +985,7 @@
             pokemon: [],
             berry: [
               { name: "橙橙果", effect: "攜帶時 HP 低於一半或直接使用恢復 10 HP", growth: "快速" },
-              { name: "柿仔果", effect: "自動食用或直接使用解除「混亂」狀態", growth: "快速" }
+              { name: "柿子果", effect: "自動食用或直接使用解除「混亂」狀態", growth: "快速" }
             ]
           }
         }
@@ -1000,7 +1013,8 @@
         setIsPokedexModalOpen(false);  
         setIsBerryModalOpen(false);
         setIsAccessoryModalOpen(false);
-        setIsStoneModalOpen(false); // 🌟 新增
+        setIsStoneModalOpen(false); 
+        setIsPotionModalOpen(false); 
         setSelectedNpcTrade(null);
       };
 
@@ -1067,7 +1081,7 @@
                       onClick={() => { handleTabChange(item.id); setIsMobileMenuOpen(false); }}
                       className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-bold transition-all ${
                         activeTab === item.id
-                          ? 'bg-emerald-100 text-emerald-700'
+                          ? 'bg-emerald-100 text-emerald-700 font-bold'
                           : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                       }`}
                     >
@@ -1098,7 +1112,7 @@
           <div 
             className="relative overflow-hidden pt-8 pb-36 sm:pt-12 sm:pb-48 bg-gray-900"
             style={{
-              backgroundImage: `url('./my-bg.png'), url('https://images.unsplash.com/photo-1607988795691-3d0147b43231?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')`,
+              backgroundImage: `url('./1000000873.png'), url('https://images.unsplash.com/photo-1607988795691-3d0147b43231?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat'
@@ -1127,7 +1141,7 @@
                 <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-4 tracking-tight drop-shadow-xl">
                   歡迎來到 <span className="text-emerald-400">海根寶可夢</span> 的世界
                 </h1>
-                <p className="text-lg sm:text-xl text-gray-100 mb-8 max-w-2xl mx-auto font-medium drop-shadow-md">
+                <p className="text-lg sm:text-xl text-gray-100 mb-8 max-w-2xl mx-auto font-medium drop-shadow-md text-justify md:text-center">
                   結合 Minecraft 的自由建造與寶可夢的收集養成，立即下載專屬模組包，與我們一起踏上成為寶可夢大師的旅程！
                 </p>
                 
@@ -1166,7 +1180,7 @@
                   </h2>
                    <div className="bg-emerald-50 rounded-xl p-6 border-l-4 border-emerald-500">
                       <h3 className="text-xl font-bold text-emerald-800 mb-2">🎈 關於海根寶可夢</h3>
-                      <p>
+                      <p className="text-justify">
                         海根寶可夢伺服器致力於打造一個友善、穩定且充滿探索樂趣的 Minecraft 寶可夢生態。
                         我們使用了精緻的 Cobblemon 模組，保留了原版 Minecraft 的方塊美學，同時完美融入了寶可夢的捕捉、戰鬥與培育系統。
                       </p>
@@ -1176,7 +1190,7 @@
                         <h4 className="font-bold text-lg text-gray-800 mb-4 flex items-center gap-2">
                           <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">1</span> 如何加入伺服器？
                         </h4>
-                        <ul className="space-y-3 list-disc list-inside text-gray-600">
+                        <ul className="space-y-3 list-disc list-inside text-gray-600 text-justify">
                           <li>點擊右上角「模組包下載」取得專屬檔案。</li>
                           <li>將模組包安裝至您的 Minecraft 啟動器。</li>
                           <li>啟動遊戲，輸入 IP：<code className="bg-gray-100 px-2 py-1 rounded text-emerald-600">{serverIP}</code>。</li>
@@ -1186,7 +1200,7 @@
                         <h4 className="font-bold text-lg text-gray-800 mb-4 flex items-center gap-2">
                           <span className="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center">2</span> 基本伺服器規範
                         </h4>
-                        <ul className="space-y-3 list-disc list-inside text-gray-600">
+                        <ul className="space-y-3 list-disc list-inside text-gray-600 text-justify">
                           <li>請互相尊重，嚴禁任何形式的謾罵、歧視與騷擾。</li>
                           <li>嚴禁使用外掛、作弊客戶端或利用惡意 Bug 獲利。</li>
                           <li>請勿惡意破壞他人建築或未經同意拿取他人財物。</li>
@@ -1202,7 +1216,7 @@
                   <h2 className="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-3">
                     <Icon name="map" className="text-emerald-500" size={32} /> 伺服器探險地圖
                   </h2>
-                  <p className="text-gray-600 mb-6">
+                  <p className="text-gray-600 mb-6 text-justify">
                     歡迎來到海根寶可夢的廣大世界！這裡記錄了目前已知的城鎮、荒野與神祕地標。準備好你的精靈球，隨時踏上未知的旅程吧！
                   </p>
                   
@@ -1217,7 +1231,7 @@
                     </div>
                     <div>
                       <h4 className="font-bold text-blue-800">遊戲內地圖導航</h4>
-                      <p className="text-sm text-blue-600/80 mt-1">
+                      <p className="text-sm text-blue-600/80 mt-1 text-justify">
                         強烈建議玩家在安裝模組包時，確保 <strong>Xaero's World Map</strong> 或 <strong>JourneyMap</strong> 已啟用，方便在遊戲中隨時按下快速鍵查看自身位置與標記家園！
                       </p>
                     </div>
@@ -1254,9 +1268,15 @@
                     </div>
 
                     {/* 藥劑系統 */}
-                    <div className="bg-white border border-gray-100 shadow-sm rounded-xl overflow-hidden hover:-translate-y-1 hover:shadow-lg transition duration-300">
-                      <div className="h-32 bg-gradient-to-br from-cyan-400 to-cyan-600 flex items-center justify-center text-white">
-                        <Icon name="beaker" size={48} className="opacity-80 drop-shadow-md" />
+                    <div 
+                      onClick={() => setIsPotionModalOpen(true)}
+                      className="bg-white border border-gray-100 shadow-sm rounded-xl overflow-hidden hover:-translate-y-1 hover:shadow-lg transition duration-300 cursor-pointer group"
+                    >
+                      <div className="h-32 bg-gradient-to-br from-cyan-400 to-cyan-600 flex items-center justify-center text-white relative">
+                        <Icon name="beaker" size={48} className="opacity-80 drop-shadow-md transform group-hover:scale-110 transition-transform duration-300" />
+                        <div className="absolute bottom-3 right-3 text-xs bg-black/30 px-3 py-1 rounded-full opacity-80 group-hover:opacity-100 transition backdrop-blur-sm flex items-center gap-1 font-medium">
+                          點擊查看藥劑合成圖鑑 <Icon name="arrow-left" size={12} className="transform rotate-180" />
+                        </div>
                       </div>
                       <div className="p-6">
                         <h3 className="font-bold text-xl mb-2 text-gray-800">藥劑系統</h3>
@@ -1297,13 +1317,12 @@
                       <div className="h-32 bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white relative">
                         {/* 讀取真實果樹圖片 (做為封面小圖示) */}
                         <img 
-                          src="./oran_berry.png" 
+                          src="./784273.png" 
                           alt="果樹圖鑑" 
                           className="w-16 h-16 transform group-hover:scale-110 transition duration-300 drop-shadow-xl animate-pulse" 
                           style={{ imageRendering: 'pixelated' }}
                           onError={(e) => { e.target.style.display = 'none'; e.target.nextElementSibling.style.display = 'flex'; }}
                         />
-                        {/* 如果沒有真實圖片則顯示這個預設蘋果 */}
                         <div className="hidden items-center justify-center w-full h-full" style={{ display: 'none' }}>
                            <Icon name="apple" size={48} className="opacity-80 drop-shadow-md text-white" />
                         </div>
@@ -1348,7 +1367,7 @@
                       </div>
                     </div>
 
-                    {/* 🌟 新增：進化石位置 (點擊開啟進化石 Modal) */}
+                    {/* 🌟 進化石位置 (點擊開啟進化石 Modal) */}
                     <div 
                       onClick={() => setIsStoneModalOpen(true)}
                       className="bg-white border border-gray-100 shadow-sm rounded-xl overflow-hidden hover:-translate-y-1 hover:shadow-lg transition duration-300 cursor-pointer group"
@@ -1409,7 +1428,7 @@
                               {selectedLocation.type}
                             </span>
                           </div>
-                          <p className="text-gray-500 mt-2 text-sm sm:text-base">{selectedLocation.description}</p>
+                          <p className="text-gray-500 mt-2 text-sm sm:text-base text-justify">{selectedLocation.description}</p>
                         </div>
                       </div>
 
@@ -1467,7 +1486,7 @@
                             {selectedLocation.data.npc.length > 0 ? (
                               <div className="grid md:grid-cols-2 gap-4">
                                 {selectedLocation.data.npc.map((npc, idx) => (
-                                  <div key={idx} className="bg-indigo-50/50 border border-indigo-100 p-5 rounded-xl flex gap-4 hover:bg-white hover:shadow-md transition">
+                                  <div key={idx} className="bg-indigo-50/50 border border-indigo-100 p-5 rounded-xl flex gap-4 hover:bg-white hover:shadow-md transition text-justify">
                                     <div className="w-12 h-12 bg-indigo-200 rounded-full flex items-center justify-center flex-shrink-0 text-indigo-800 font-bold text-xl shadow-sm">
                                       {npc.name.charAt(0)}
                                     </div>
@@ -1542,7 +1561,7 @@
                             {selectedLocation.data.berry.length > 0 ? (
                                <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
                                 {selectedLocation.data.berry.map((berry, idx) => (
-                                  <div key={idx} className="bg-rose-50/50 border border-rose-100 p-4 rounded-xl flex items-center gap-4 hover:bg-white hover:shadow-md transition">
+                                  <div key={idx} className="bg-rose-50/50 border border-rose-100 p-4 rounded-xl flex items-center gap-4 hover:bg-white hover:shadow-md transition text-justify">
                                     <div className="w-12 h-12 bg-rose-200 rounded-lg flex items-center justify-center flex-shrink-0 text-rose-600">
                                       <Icon name="apple" size={24} />
                                     </div>
@@ -1725,13 +1744,12 @@
                       
                       {/* 1. 寶貝球 */}
                       <div className="bg-white p-6 rounded-2xl border border-red-100 shadow-sm flex items-center gap-6 hover:shadow-md hover:-translate-y-1 transition duration-300">
-                         {/* CSS 繪製：寶貝球 */}
                          <div className="w-20 h-20 flex-shrink-0 rounded-full border-[3px] border-gray-800 relative overflow-hidden bg-white shadow-inner flex items-center justify-center">
                             <div className="absolute top-0 w-full h-1/2 bg-red-500"></div>
                             <div className="absolute w-full h-1.5 bg-gray-800 z-10"></div>
                             <div className="absolute w-6 h-6 rounded-full border-[3px] border-gray-800 bg-white z-20 shadow-sm"></div>
                          </div>
-                         <div>
+                         <div className="flex-1 text-justify">
                             <div className="text-2xl font-bold text-gray-800 mb-1">寶貝球</div>
                             <div className="text-sm text-gray-500 mb-3">最基礎、最常見的精靈球。</div>
                             <span className="inline-block bg-red-100 text-red-700 px-3 py-1 rounded-lg font-black text-sm border border-red-200">
@@ -1742,16 +1760,15 @@
 
                       {/* 2. 超級球 */}
                       <div className="bg-white p-6 rounded-2xl border border-blue-100 shadow-sm flex items-center gap-6 hover:shadow-md hover:-translate-y-1 transition duration-300">
-                         {/* CSS 繪製：超級球 */}
                          <div className="w-20 h-20 flex-shrink-0 rounded-full border-[3px] border-gray-800 relative overflow-hidden bg-white shadow-inner flex items-center justify-center">
                             <div className="absolute top-0 w-full h-1/2 bg-blue-500 flex justify-between px-2 pt-1.5">
-                                <div className="w-3 h-4 bg-red-500 transform -skew-x-12 rounded-sm border-b border-gray-800/30"></div>
-                                <div className="w-3 h-4 bg-red-500 transform skew-x-12 rounded-sm border-b border-gray-800/30"></div>
+                                <div className="w-3.5 h-4 bg-red-500 transform -skew-x-12 rounded-sm border-b border-gray-800/30"></div>
+                                <div className="w-3.5 h-4 bg-red-500 transform skew-x-12 rounded-sm border-b border-gray-800/30"></div>
                             </div>
                             <div className="absolute w-full h-1.5 bg-gray-800 z-10"></div>
                             <div className="absolute w-6 h-6 rounded-full border-[3px] border-gray-800 bg-white z-20 shadow-sm"></div>
                          </div>
-                         <div>
+                         <div className="flex-1 text-justify">
                             <div className="text-2xl font-bold text-gray-800 mb-1">超級球</div>
                             <div className="text-sm text-gray-500 mb-3">性能比寶貝球稍好的精靈球。</div>
                             <span className="inline-block bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-black text-sm border border-blue-200">
@@ -1762,17 +1779,14 @@
 
                       {/* 3. 高級球 */}
                       <div className="bg-white p-6 rounded-2xl border border-yellow-200 shadow-sm flex items-center gap-6 hover:shadow-md hover:-translate-y-1 transition duration-300">
-                         {/* CSS 繪製：高級球 */}
                          <div className="w-20 h-20 flex-shrink-0 rounded-full border-[3px] border-gray-800 relative overflow-hidden bg-white shadow-inner flex items-center justify-center">
                             <div className="absolute top-0 w-full h-1/2 bg-gray-800"></div>
-                            {/* 黃色 H 字形狀 */}
                             <div className="absolute top-0 w-10 h-1/2 bg-yellow-400 left-1/2 transform -translate-x-1/2"></div>
                             <div className="absolute top-1.5 w-6 h-1/2 bg-gray-800 left-1/2 transform -translate-x-1/2 rounded-t-full"></div>
-                            
                             <div className="absolute w-full h-1.5 bg-gray-800 z-10"></div>
                             <div className="absolute w-6 h-6 rounded-full border-[3px] border-gray-800 bg-white z-20 shadow-sm"></div>
                          </div>
-                         <div>
+                         <div className="flex-1 text-justify">
                             <div className="text-2xl font-bold text-gray-800 mb-1">高級球</div>
                             <div className="text-sm text-gray-500 mb-3">擁有很高捕獲成功率的精靈球。</div>
                             <span className="inline-block bg-yellow-100 text-yellow-700 px-3 py-1 rounded-lg font-black text-sm border border-yellow-300">
@@ -1784,7 +1798,6 @@
                       {/* 4. 大師球 */}
                       <div className="bg-purple-50 p-6 rounded-2xl border border-purple-200 shadow-md flex items-center gap-6 hover:shadow-lg hover:-translate-y-1 transition duration-300 relative overflow-hidden">
                          <div className="absolute right-0 top-0 w-32 h-32 bg-purple-200 rounded-full blur-3xl opacity-50"></div>
-                         {/* CSS 繪製：大師球 */}
                          <div className="w-20 h-20 flex-shrink-0 rounded-full border-[3px] border-gray-800 relative overflow-hidden bg-white shadow-inner flex items-center justify-center">
                             <div className="absolute top-0 w-full h-1/2 bg-purple-600 flex justify-between items-center px-[2px]">
                                 <div className="w-3.5 h-3.5 bg-pink-400 rounded-full border border-purple-800 mb-2 shadow-inner"></div>
@@ -1794,7 +1807,7 @@
                             <div className="absolute w-full h-1.5 bg-gray-800 z-10"></div>
                             <div className="absolute w-6 h-6 rounded-full border-[3px] border-gray-800 bg-white z-20 shadow-sm"></div>
                          </div>
-                         <div className="relative z-10">
+                         <div className="relative z-10 flex-1 text-justify">
                             <div className="text-2xl font-bold text-purple-900 mb-1 flex items-center gap-2">
                               大師球 <Icon name="sparkles" size={16} className="text-purple-500" />
                             </div>
@@ -1815,7 +1828,7 @@
                             <div className="absolute w-full h-1.5 bg-gray-800 z-10"></div>
                             <div className="absolute w-6 h-6 rounded-full border-[3px] border-gray-800 bg-white z-20 shadow-sm"></div>
                          </div>
-                         <div>
+                         <div className="flex-1 text-justify">
                             <div className="text-2xl font-bold text-gray-800 mb-1">先機球</div>
                             <div className="text-sm text-gray-500 mb-3">如果戰鬥開始的第一回合使用，會非常容易捉到寶可夢。</div>
                             <span className="inline-block bg-cyan-100 text-cyan-700 px-3 py-1 rounded-lg font-black text-sm border border-cyan-200">
@@ -2125,6 +2138,103 @@
                         <div className="col-span-1 md:col-span-2 flex flex-col items-center justify-center py-16 text-gray-400">
                           <Icon name="search" size={48} className="mb-4 opacity-30 text-amber-400" />
                           <p>找不到符合「<span className="font-bold text-amber-600">{stoneSearchTerm}</span>」的進化石 😢</p>
+                        </div>
+                      )}
+
+                   </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================= */}
+          {/* 🌟 新增：藥劑圖鑑 (Modal)                                   */}
+          {/* ========================================================= */}
+          {isPotionModalOpen && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fadeIn">
+              <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh] animate-slideInRight">
+                
+                {/* Modal 標題列 */}
+                <div className="bg-gradient-to-r from-cyan-500 to-blue-600 p-4 sm:p-6 flex justify-between items-center text-white shadow-md relative z-10">
+                   <div className="flex items-center gap-4 w-full max-w-lg">
+                     <h3 className="text-xl sm:text-2xl font-bold flex items-center gap-2 whitespace-nowrap">
+                        <div className="w-8 h-8 rounded-full border-[2px] border-white bg-white/20 relative overflow-hidden flex items-center justify-center backdrop-blur-md shadow-inner hidden sm:flex">
+                           <Icon name="beaker" size={18} className="text-white drop-shadow" />
+                        </div>
+                        藥劑合成圖鑑
+                     </h3>
+                     <div className="relative flex-1 hidden sm:block">
+                       <input 
+                         type="text" 
+                         placeholder="搜尋藥水名稱或恢復效果..." 
+                         value={potionSearchTerm}
+                         onChange={(e) => setPotionSearchTerm(e.target.value)}
+                         className="w-full pl-10 pr-4 py-2 rounded-full bg-white/20 border border-white/30 text-white placeholder-white/70 focus:outline-none focus:bg-white focus:text-gray-800 focus:placeholder-gray-400 transition"
+                       />
+                       <Icon name="search" size={18} className="absolute left-3 top-2.5 text-current opacity-70" />
+                     </div>
+                   </div>
+                   <button 
+                     onClick={() => setIsPotionModalOpen(false)} 
+                     className="hover:bg-white/20 p-2 rounded-full transition focus:outline-none ml-2"
+                     title="關閉視窗"
+                   >
+                     <Icon name="x" size={28} />
+                   </button>
+                </div>
+
+                {/* 手機版搜尋列 */}
+                <div className="p-4 sm:hidden bg-cyan-50 border-b border-cyan-100 z-10">
+                   <div className="relative w-full">
+                     <input 
+                       type="text" 
+                       placeholder="搜尋藥水名稱或恢復效果..." 
+                       value={potionSearchTerm}
+                       onChange={(e) => setPotionSearchTerm(e.target.value)}
+                       className="w-full pl-10 pr-4 py-2 rounded-xl bg-white border border-gray-200 text-gray-800 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition"
+                     />
+                     <Icon name="search" size={18} className="absolute left-3 top-2.5 text-gray-400" />
+                   </div>
+                </div>
+
+                {/* Modal 內容區塊 */}
+                <div className="p-6 md:p-10 overflow-y-auto bg-gray-50 flex-1">
+                   <div className="grid md:grid-cols-2 gap-6">
+                      
+                      {potionDataList
+                        .filter(p => p.name.includes(potionSearchTerm) || p.tag.includes(potionSearchTerm) || p.desc.includes(potionSearchTerm) || p.effect.includes(potionSearchTerm))
+                        .map((potion, idx) => (
+                        <div key={idx} className="bg-white p-6 rounded-2xl border border-cyan-100 shadow-sm flex items-start gap-6 hover:shadow-md hover:-translate-y-1 transition duration-300">
+                           <div className="w-20 h-20 flex-shrink-0 bg-cyan-50/50 rounded-full border-4 border-cyan-100 relative overflow-hidden shadow-inner flex flex-col items-center justify-center mt-1">
+                              <img 
+                                src={potion.img} 
+                                alt={potion.name} 
+                                className="w-12 h-12 transform hover:scale-110 transition duration-300 drop-shadow-sm" 
+                                style={{ imageRendering: 'pixelated' }}
+                                onError={(e) => { e.target.style.display = 'none'; e.target.nextElementSibling.style.display = 'block'; }}
+                              />
+                              <span className={`hidden ${potion.iconColor}`} style={{ display: 'none' }}>
+                                 <Icon name="beaker" size={32} />
+                              </span>
+                           </div>
+                           <div className="flex-1">
+                              <div className="text-xl font-bold text-gray-800 mb-1 flex items-center gap-2 flex-wrap">
+                                {potion.name} <span className={`text-xs font-bold ${potion.tagClasses} px-2 py-0.5 rounded border whitespace-nowrap`}>{potion.tag}</span>
+                              </div>
+                              <div className="text-sm text-gray-500 mb-3 text-justify leading-relaxed">
+                                {potion.desc}
+                              </div>
+                              <span className="inline-block bg-cyan-50 text-cyan-700 px-3 py-1 rounded-lg font-black text-sm border border-cyan-100">
+                                效果: {potion.effect}
+                              </span>
+                           </div>
+                        </div>
+                      ))}
+
+                      {potionDataList.filter(p => p.name.includes(potionSearchTerm) || p.tag.includes(potionSearchTerm) || p.desc.includes(potionSearchTerm) || p.effect.includes(potionSearchTerm)).length === 0 && (
+                        <div className="col-span-1 md:col-span-2 flex flex-col items-center justify-center py-16 text-gray-400">
+                          <Icon name="search" size={48} className="mb-4 opacity-30 text-cyan-400" />
+                          <p>找不到符合「<span className="font-bold text-cyan-600">{potionSearchTerm}</span>」的藥劑 😢</p>
                         </div>
                       )}
 

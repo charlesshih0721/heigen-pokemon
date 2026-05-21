@@ -236,8 +236,8 @@
       { name: "葡萄果", img: "./784321.png", tag: "降努力/升親密", tagClasses: "text-yellow-500 bg-yellow-50 border-yellow-200", iconColor: "text-yellow-400", desc: "對寶可夢使用後，能使其變得非常容易親近人（提升親密度），但會稍微降低特防的基礎點數（努力值）。", speed: "快速" },
       { name: "茄番果", img: "./784322.png", tag: "降努力/升親密", tagClasses: "text-red-600 bg-red-50 border-red-200", iconColor: "text-red-500", desc: "對寶可夢使用後，能使其變得非常容易親近人（提升親密度），但會稍微降低速度的基礎點數（努力值）。", speed: "快速" },
       { name: "刺角果", img: "./784323.png", tag: "料理食材", tagClasses: "text-orange-500 bg-orange-50 border-orange-200", iconColor: "text-orange-400", desc: "外表裝扮獨特的樹果。可用於料理系統，用來製作特殊口味寶可方塊或寶芬的高級食材。", speed: "緩慢" },
-      { name: "椰木果", img: "./784324.png", tag: "料理食材", tagClasses: "text-pink-500 bg-pink-50 border-pink-200", iconColor: "text-pink-400", desc: "外表獨特的樹果。可用於料理系統，用來製作特殊口味寶可方塊或寶芬的高級食材。", speed: "緩慢" },
-      { name: "瓜西果", img: "./784325.png", tag: "料理食材", tagClasses: "text-green-500 bg-green-50 border-green-200", iconColor: "text-green-400", desc: "外表獨特的樹果。可用於料理系統，用來製作特殊口味寶可方塊或寶芬的高級食材。", speed: "緩慢" },
+      { name: "椰木果", img: "./784324.png", tag: "料理食材", tagClasses: "text-pink-500 bg-pink-50 border-pink-200", iconColor: "text-pink-400", desc: "外表獨特的樹果. 可用於料理系統，用來製作特殊口味寶可方塊或寶芬的高級食材。", speed: "緩慢" },
+      { name: "瓜西果", img: "./784325.png", tag: "料理食材", tagClasses: "text-green-500 bg-green-50 border-green-200", iconColor: "text-green-400", desc: "外表獨特的樹果. 可用於料理系統，用來製作特殊口味寶可方塊或寶芬的高級食材。", speed: "緩慢" },
       { name: "金枕果", img: "./784326.png", tag: "料理食材", tagClasses: "text-purple-500 bg-purple-50 border-purple-200", iconColor: "text-purple-400", desc: "外表獨特的樹果。可用於料理系統，用來製作特殊口味寶可方塊或寶芬的高級食材。", speed: "緩慢" },
       { name: "靛莓果", img: "./784327.png", tag: "防禦提升", tagClasses: "text-yellow-600 bg-yellow-50 border-yellow-200", iconColor: "text-yellow-500", desc: "作為攜帶物使用後，當受到物理招式攻擊時發動，能夠提升寶可夢的防禦。", speed: "極慢" },
       { name: "業開果", img: "./784328.png", tag: "特防提升", tagClasses: "text-blue-600 bg-blue-50 border-blue-200", iconColor: "text-blue-500", desc: "作為攜帶物使用後，當受到特殊招式攻擊時發動，能夠提升寶可夢的特防。", speed: "極慢" },
@@ -263,7 +263,7 @@
       { name: "不變之石", img: "./everstone.png", tag: "阻止進化", tagClasses: "text-gray-500 bg-gray-100 border-gray-300", icon: "octagon", iconColor: "text-gray-400", desc: "攜帶該道具的寶可夢將不會進化。若在繁殖時攜帶，子代會必定遺傳攜帶者的性格。" }
     ];
 
-    // --- 💎 進化之石資料庫 (已更換為您提供的 10 種進化之石最新數字圖片路徑，且不做其他修改) ---
+    // --- 💎 進化之石資料庫 ---
     const stoneDataList = [
       { name: "水之石 (Water Stone)", img: "./688313.png", tag: "水域/潮濕", tagClasses: "text-blue-600 bg-blue-50 border-blue-200", desc: "用於特定水屬性寶可夢進化。主要分布於「龍門湖」的水底岩石。", rarity: "普通" },
       { name: "火之石 (Fire Stone)", img: "./688232.png", tag: "火山/乾燥", tagClasses: "text-red-600 bg-red-50 border-red-200", desc: "用於特定火屬性寶可夢進化。主要出沒於「黑山走道」的岩柱。", rarity: "普通" },
@@ -277,25 +277,34 @@
       { name: "月之石 (Moon Stone)", img: "./688293.png", tag: "月光/洞窟", tagClasses: "text-indigo-600 bg-indigo-50 border-indigo-200", desc: "映射著月色的神秘石塊。在滿月之夜，探索「堅岩洞窟深處」挖掘尋獲。", rarity: "普通" }
     ];
 
-    // --- 🧪 寶可夢藥水資料庫 (共 17 種實用藥劑) ---
+    // --- 🧪 寶可夢藥水資料庫 (共計 26 種藥物與藥釀 - 已套用自訂命名與左右平齊描述) ---
     const potionDataList = [
-      { name: "傷藥", img: "./potion.png", tag: "HP恢復", tagClasses: "text-blue-500 bg-blue-50 border-blue-200", iconColor: "text-blue-300", desc: "最基礎的微調恢復噴霧，能讓受傷的寶可夢回復 20 點 HP。是新手訓練家在冒險初期最依賴的健康藥水。", effect: "回復 20 HP" },
-      { name: "好傷藥", img: "./super_potion.png", tag: "HP恢復", tagClasses: "text-blue-500 bg-blue-50 border-blue-200", iconColor: "text-blue-300", desc: "性能優良的加強版噴霧傷藥，能回復寶可夢 60 點 HP。適合進入森林與洞窟探險的中期訓練家。", effect: "回復 60 HP" },
-      { name: "厲害傷藥", img: "./hyper_potion.png", tag: "HP恢復", tagClasses: "text-blue-500 bg-blue-50 border-blue-200", iconColor: "text-blue-300", desc: "效果卓越的高能恢復噴霧，能讓寶可夢回復 120 點 HP。在激烈的道館挑戰與野外 Boss 戰中非常可靠。", effect: "回復 120 HP" },
-      { name: "全滿藥", img: "./max_potion.png", tag: "HP完全恢復", tagClasses: "text-cyan-500 bg-cyan-50 border-cyan-200", iconColor: "text-cyan-300", desc: "最高規格的恢復噴霧。無論寶可夢受了多重的傷，都能在瞬間完全恢復所有的 HP 狀態。", effect: "回復全部 HP" },
-      { name: "全藥", img: "./full_restore.png", tag: "全恢復", tagClasses: "text-indigo-600 bg-indigo-50 border-indigo-200", iconColor: "text-indigo-300", desc: "終極神聖的綠色調配液。不僅能完全回復寶可夢的所有 HP，還能同時解除中毒、麻痺、灼傷、冰凍與睡眠等所有異常狀態。", effect: "完全恢復 HP + 解除異常" },
-      { name: "萬能藥", img: "./full_heal.png", tag: "狀態消除", tagClasses: "text-purple-500 bg-purple-50 border-purple-200", iconColor: "text-purple-300", desc: "噴霧式的綜合治癒噴劑。能夠在一瞬間消除寶可夢身上所有的異常狀態（中毒、麻痺、灼傷、睡眠、冰凍及混亂狀態）。", effect: "解除所有異常狀態" },
-      { name: "解毒藥", img: "./antidote.png", tag: "狀態消除", tagClasses: "text-purple-500 bg-purple-50 border-purple-200", iconColor: "text-purple-300", desc: "具有針對性的微量解毒噴霧。可立即消除因踩到毒蘑菇，或受到毒屬性招式攻擊而產生的「中毒」異常狀態。", effect: "解除中毒狀態" },
-      { name: "解麻藥", img: "./paralyze_heal.png", tag: "狀態消除", tagClasses: "text-purple-500 bg-purple-50 border-purple-200", iconColor: "text-purple-300", desc: "專用舒緩噴霧。能活化寶可夢僵硬的肌肉，立刻治癒因受到電擊或麻痺粉而陷入的「麻痺」狀態。", effect: "解除麻痺狀態" },
-      { name: "燒傷藥", img: "./burn_heal.png", tag: "狀態消除", tagClasses: "text-purple-500 bg-purple-50 border-purple-200", iconColor: "text-purple-300", desc: "冰涼感極強的降溫噴霧。能瞬間融化並治癒因高溫招式而導致的「灼傷」狀態，防止寶可夢在戰鬥中持續失去體力。", effect: "解除灼傷狀態" },
-      { name: "解凍藥", img: "./ice_heal.png", tag: "狀態消除", tagClasses: "text-purple-500 bg-purple-50 border-purple-200", iconColor: "text-purple-300", desc: "溫和釋放熱能的噴霧。能迅速融化封鎖住寶可夢身體的冰霜，解除在雪山探險中容易陷入的「冰凍」狀態。", effect: "解除冰凍狀態" },
-      { name: "甦醒藥", img: "./awakening.png", tag: "狀態消除", tagClasses: "text-purple-500 bg-purple-50 border-purple-200", iconColor: "text-purple-300", desc: "具有清新提神氣味的微量吸入劑。能立刻刺激精神，喚醒因催眠招式、歌聲而陷入「睡眠」狀態的寶可夢。", effect: "解除睡眠狀態" },
-      { name: "活力碎片", img: "./revive.png", tag: "瀕死復活", tagClasses: "text-emerald-600 bg-emerald-50 border-emerald-200", iconColor: "text-emerald-300", desc: "金黃色閃耀著神聖微光的奇特結晶碎片。能溫和地凝聚生命能量，復活瀕死（無法戰鬥）的寶可夢並恢復一半的最大 HP。", effect: "瀕死復活 + 回復 50% HP" },
-      { name: "活力塊", img: "./max_revive.png", tag: "瀕死復活", tagClasses: "text-emerald-600 bg-emerald-50 border-emerald-200", iconColor: "text-emerald-300", desc: "一整顆散發著無限溫暖生命力的黃金星狀結晶。能直接復活瀕死的寶可夢，並完美回復所有的體力與狀態。", effect: "瀕死復活 + 回復全部 HP" },
-      { name: "能量粉", img: "./energy_powder.png", tag: "HP恢復/草藥", tagClasses: "text-emerald-500 bg-emerald-50 border-emerald-200", iconColor: "text-emerald-400", desc: "由天然植物烘乾磨碎而成的非常苦的草藥粉末。能為受傷寶可夢回復 50 HP，但因為太苦了會稍微降低親密度。", speed: "中藥", effect: "回復 50 HP (降低親密)" },
-      { name: "能量根", img: "./energy_root.png", tag: "HP恢復/草藥", tagClasses: "text-emerald-500 bg-emerald-50 border-emerald-200", iconColor: "text-emerald-400", desc: "味道極其苦澀的天然植物根莖，含有豐沛的療癒成分。能回復 200 HP，使用後會降低寶可夢的親密度。", speed: "中藥", effect: "回復 200 HP (降低親密)" },
-      { name: "萬能粉", img: "./heal_powder.png", tag: "狀態消除/草藥", tagClasses: "text-emerald-500 bg-emerald-50 border-emerald-200", iconColor: "text-emerald-400", desc: "苦澀至極的天然草藥粉。可以消除寶可夢身上的所有異常狀態，但因為味道太差，使用後會降低親密度。", speed: "中藥", effect: "解除異常 (降低親密)" },
-      { name: "復活草", img: "./revival_herb.png", tag: "瀕死復活/草藥", tagClasses: "text-emerald-500 bg-emerald-50 border-emerald-200", iconColor: "text-emerald-400", desc: "苦味直衝訓練家與寶可夢腦門的天然神聖草藥。能完美復活瀕死寶可夢並完全恢復 HP。由於極難吃，會大幅降低親密度。", speed: "中藥", effect: "瀕死復活 + 回復全部 HP (大幅降低親密)" }
+      { name: "樹果汁", img: "./784342.png", tag: "HP恢復", tagClasses: "text-blue-500 bg-blue-50 border-blue-200", iconColor: "text-blue-300", desc: "由新鮮樹果壓榨而成的天然果汁，能回復受傷寶可夢 20 點 HP。口感酸甜，深受寶可夢喜愛。", effect: "回復 20 HP" },
+      { name: "中藥", img: "./784343.png", tag: "HP恢復/草藥", tagClasses: "text-emerald-500 bg-emerald-50 border-emerald-200", iconColor: "text-emerald-400", desc: "由天然植物烘乾磨碎而成的非常苦的草藥粉末。能為受傷寶可夢回復 50 HP，但因為太苦了會稍微降低親密度。", effect: "回復 50 HP (降低親密)" },
+      { name: "好中藥", img: "./784344.png", tag: "HP恢復/草藥", tagClasses: "text-emerald-500 bg-emerald-50 border-emerald-200", iconColor: "text-emerald-400", desc: "味道極其苦澀的天然植物根莖，含有豐沛的療癒成分。能回復 200 HP，使用後會降低寶可夢的親密度。", effect: "回復 200 HP (降低親密)" },
+      { name: "厲害中藥", img: "./784345.png", tag: "瀕死復活/草藥", tagClasses: "text-emerald-500 bg-emerald-50 border-emerald-200", iconColor: "text-emerald-400", desc: "苦味直衝訓練家與寶可夢腦門的天然神聖草藥。能完美復活瀕死寶可夢並完全恢復 HP。由於極難吃，會大幅降低親密度。", effect: "瀕死復活 + 回復全部 HP (大幅降低親密)" },
+      { name: "萬用粉", img: "./784346.png", tag: "狀態消除/草藥", tagClasses: "text-emerald-500 bg-emerald-50 border-emerald-200", iconColor: "text-emerald-400", desc: "苦澀至極的天然草藥粉。可以消除寶可夢身上的所有異常狀態，但因為味道太差，使用後會降低親密度。", effect: "解除異常 (降低親密)" },
+      { name: "藥釀", img: "./784347.png", tag: "持續恢復/草藥", tagClasses: "text-emerald-600 bg-emerald-50 border-emerald-200", iconColor: "text-emerald-500", desc: "由多種森林植物與天然蜜糖長時間釀製而成的藥釀。在非戰鬥狀態下使用，能為寶可夢提供長效的療育與親密度滋養。", effect: "漸進式回復體力與大幅增加親密度" },
+      { name: "傷藥", img: "./784348.png", tag: "HP恢復", tagClasses: "text-blue-500 bg-blue-50 border-blue-200", iconColor: "text-blue-300", desc: "最基礎的微調恢復噴霧，能讓受傷的寶可夢回復 20 點 HP。是新手訓練家在冒險初期最依賴的健康藥水。", effect: "回復 20 HP" },
+      { name: "好傷藥", img: "./784349.png", tag: "HP恢復", tagClasses: "text-blue-500 bg-blue-50 border-blue-200", iconColor: "text-blue-300", desc: "性能優良的加強版噴霧傷藥，能回復寶可夢 60 點 HP。適合進入森林與洞窟探險的中期訓練家。", effect: "回復 60 HP" },
+      { name: "厲害傷藥", img: "./784350.png", tag: "HP恢復", tagClasses: "text-blue-500 bg-blue-50 border-blue-200", iconColor: "text-blue-300", desc: "效果卓越的高能恢復噴霧，能讓寶可夢回復 120 點 HP。在激烈的道館挑戰與野外 Boss 戰中非常可靠。", effect: "回復 120 HP" },
+      { name: "全滿藥", img: "./784351.png", tag: "HP完全恢復", tagClasses: "text-cyan-500 bg-cyan-50 border-cyan-200", iconColor: "text-cyan-300", desc: "最高規格的恢復噴霧。無論寶可夢受了多重的傷，都能在瞬間完全恢復所有的 HP 狀態。", effect: "回復全部 HP" },
+      { name: "全複藥", img: "./784352.png", tag: "全恢復", tagClasses: "text-indigo-600 bg-indigo-50 border-indigo-200", iconColor: "text-indigo-300", desc: "終極神聖的綠色調配液。不僅能完全回復寶可夢的所有 HP，還能同時解除中毒、麻痺、灼傷、冰凍與睡眠等所有異常狀態。", effect: "完全恢復 HP + 解除異常" },
+      { name: "解毒藥", img: "./784353.png", tag: "狀態消除", tagClasses: "text-purple-500 bg-purple-50 border-purple-200", iconColor: "text-purple-300", desc: "具有針對性的微量解毒噴霧。可立即消除因踩到毒蘑菇，或受到毒屬性招式攻擊而產生的「中毒」異常狀態。", effect: "解除中毒狀態" },
+      { name: "解眠藥", img: "./784354.png", tag: "狀態消除", tagClasses: "text-purple-500 bg-purple-50 border-purple-200", iconColor: "text-purple-300", desc: "具有清新提神氣味的微量吸入劑。能立刻刺激精神，喚醒因催眠招式、歌聲而陷入「睡眠」狀態的寶可夢。", effect: "解除睡眠狀態" },
+      { name: "灼傷藥", img: "./784355.png", tag: "狀態消除", tagClasses: "text-purple-500 bg-purple-50 border-purple-200", iconColor: "text-purple-300", desc: "冰涼感極強的降溫噴霧。能瞬間融化並治癒因高溫招式而導致的「灼傷」狀態，防止寶可夢在戰鬥中持續失去體力。", effect: "解除灼傷狀態" },
+      { name: "解凍藥", img: "./784356.png", tag: "狀態消除", tagClasses: "text-purple-500 bg-purple-50 border-purple-200", iconColor: "text-purple-300", desc: "溫和釋放熱能的噴霧。能迅速融化封鎖住寶可夢身體的冰霜，解除在雪山探險中容易陷入的「冰凍」狀態。", effect: "解除冰凍狀態" },
+      { name: "解麻藥", img: "./784357.png", tag: "狀態消除", tagClasses: "text-purple-500 bg-purple-50 border-purple-200", iconColor: "text-purple-300", desc: "專用舒緩噴霧。能活化寶可夢僵硬的肌肉，立刻治癒因受到電擊或麻痺粉而陷入的「麻痺」狀態。", effect: "解除麻痺狀態" },
+      { name: "萬靈藥", img: "./784358.png", tag: "狀態消除", tagClasses: "text-purple-500 bg-purple-50 border-purple-200", iconColor: "text-purple-300", desc: "噴霧式的綜合治癒噴劑。能夠在一瞬間消除寶可夢身上所有的異常狀態（中毒、麻痺、灼傷、睡眠、冰凍及混亂狀態）。", effect: "解除所有異常狀態" },
+      { name: "PP單項小補劑", img: "./784359.png", tag: "PP恢復", tagClasses: "text-amber-500 bg-amber-50 border-amber-200", iconColor: "text-amber-300", desc: "微型的招式補給劑。可讓寶可夢的其中一個已耗盡招式，在戰鬥中或非戰鬥中回復 10 點 PP 值。", effect: "回復單個招式 10 PP" },
+      { name: "PP單項全補劑", img: "./784360.png", tag: "PP完全恢復", tagClasses: "text-amber-600 bg-amber-50 border-amber-200", iconColor: "text-amber-300", desc: "高濃縮的單招式補給藥劑。可以直接將選中的單一招式 PP 值完全回復至上限，是持久戰的實用法寶。", effect: "完全回復單個招式 PP" },
+      { name: "PP多項小補劑", img: "./784361.png", tag: "全招式PP恢復", tagClasses: "text-amber-500 bg-amber-50 border-amber-200", iconColor: "text-amber-300", desc: "中型的多方位招式調合液。能一次性地為寶可夢學會的所有招式都回復 10 點 PP 值，十分珍貴。", effect: "回復所有招式 10 PP" },
+      { name: "PP多項全補劑", img: "./784362.png", tag: "全招式PP完全恢復", tagClasses: "text-amber-600 bg-amber-50 border-amber-200", iconColor: "text-amber-300", desc: "終極的招式滿載藥劑。能夠一次將寶可夢目前擁有的四個招式的 PP 全部完全補滿，讓其重獲全額戰鬥力。", effect: "完全回復所有招式 PP" },
+      { name: "活力碎片", img: "./784363.png", tag: "瀕死復活", tagClasses: "text-emerald-600 bg-emerald-50 border-emerald-200", iconColor: "text-emerald-300", desc: "金黃色閃耀著神聖微光的奇特結晶碎片。能溫和地凝聚生命能量，復活瀕死（無法戰鬥）的寶可夢並恢復一半的最大 HP。", effect: "瀕死復活 + 回復 50% HP" },
+      { name: "活力塊", img: "./784364.png", tag: "瀕死復活", tagClasses: "text-emerald-600 bg-emerald-50 border-emerald-200", iconColor: "text-emerald-300", desc: "一整顆散發著無限溫暖生命力的黃金星狀結晶。能直接復活瀕死的寶可夢，並完美回復所有的體力與狀態。", effect: "瀕死復活 + 回復全部 HP" },
+      { name: "PP提升劑", img: "./784373.png", tag: "PP上限提升", tagClasses: "text-pink-500 bg-pink-50 border-pink-200", iconColor: "text-pink-300", desc: "高科技特製的化學配劑。能微幅永久提升選定招式的最大 PP 上限（單個招式最多使用 3 次提升）。", effect: "永久提升單一招式 PP 上限值" },
+      { name: "PP極限提升劑", img: "./784374.png", tag: "PP上限最大化", tagClasses: "text-pink-600 bg-pink-50 border-pink-200", iconColor: "text-pink-300", desc: "極致高效的上限配方。使用一次即可直接把該寶可夢指定招式的 PP 上限值永久拉升至理論極限，免去重複調校。", effect: "直接將單一招式 PP 提升至極限" },
+      { name: "球果汁", img: "./904994.png", tag: "特殊飲料/培育", tagClasses: "text-orange-500 bg-orange-50 border-orange-200", iconColor: "text-orange-300", desc: "使用純淨的圓柑果實壓榨發酵而成的特色果汁。除了具備微量恢復體力效果，更能提升親密，在非戰鬥中具有奇妙的調養作用。", effect: "微幅回復 HP + 增加親密 + 提高飽食度" }
     ];
 
     function App() {
@@ -1210,7 +1219,7 @@
                 </div>
               )}
 
-              {/* --- 2. 地圖 Tab --- */}
+              {/* --- 2. 地圖 Tab (靜態圖片展示模式) --- */}
               {activeTab === 'map' && (
                 <div className="animate-fadeIn h-full flex flex-col">
                   <h2 className="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-3">
@@ -1267,7 +1276,7 @@
                       </div>
                     </div>
 
-                    {/* 藥劑系統 */}
+                    {/* 藥劑系統 (點擊開啟藥劑 Modal) */}
                     <div 
                       onClick={() => setIsPotionModalOpen(true)}
                       className="bg-white border border-gray-100 shadow-sm rounded-xl overflow-hidden hover:-translate-y-1 hover:shadow-lg transition duration-300 cursor-pointer group"
@@ -1323,6 +1332,7 @@
                           style={{ imageRendering: 'pixelated' }}
                           onError={(e) => { e.target.style.display = 'none'; e.target.nextElementSibling.style.display = 'flex'; }}
                         />
+                        {/* 如果沒有真實圖片則顯示這個預設蘋果 */}
                         <div className="hidden items-center justify-center w-full h-full" style={{ display: 'none' }}>
                            <Icon name="apple" size={48} className="opacity-80 drop-shadow-md text-white" />
                         </div>
@@ -2217,11 +2227,11 @@
                                  <Icon name="beaker" size={32} />
                               </span>
                            </div>
-                           <div className="flex-1">
+                           <div className="flex-1 text-justify">
                               <div className="text-xl font-bold text-gray-800 mb-1 flex items-center gap-2 flex-wrap">
                                 {potion.name} <span className={`text-xs font-bold ${potion.tagClasses} px-2 py-0.5 rounded border whitespace-nowrap`}>{potion.tag}</span>
                               </div>
-                              <div className="text-sm text-gray-500 mb-3 text-justify leading-relaxed">
+                              <div className="text-sm text-gray-500 mb-3 leading-relaxed">
                                 {potion.desc}
                               </div>
                               <span className="inline-block bg-cyan-50 text-cyan-700 px-3 py-1 rounded-lg font-black text-sm border border-cyan-100">
